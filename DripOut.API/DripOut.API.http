@@ -1,0 +1,6 @@
+@DripOut.API_HostAddress = http://localhost:5260
+
+GET {{DripOut.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

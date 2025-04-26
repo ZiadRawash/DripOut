@@ -1,8 +1,10 @@
 ﻿using DripOut.Domain.Models;
+using DripOut.Domain.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Reflection.Emit;
 namespace DripOut.Persistence
 {
 	public class ApplicationDbContext : IdentityDbContext<AppUser>
@@ -32,8 +34,19 @@ namespace DripOut.Persistence
 			};
 			builder.Entity<IdentityRole>().HasData(roles);
 
-		}
+			builder.Entity<AppUser>()
+				.HasMany(u => u.Reviews)
+				.WithOne(r => r.User)
+				.HasForeignKey(r => r.AppUserId)
+				.OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<Product>()
+                .Property(p => p.Photo)
+                .HasColumnType("varbinary(max)");
+        }
+		public DbSet<Product> Products { get; set; }
+		public DbSet<Category> Categories { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
-	}
+    }
 }

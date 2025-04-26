@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using DripOut.Domain.Models.Entities;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -13,5 +14,8 @@ namespace DripOut.Domain.Models
 		public required string FirstName { get; set; }
 		public required string LastName { get; set; }
 		public List<RefreshToken>RefreshToken {  get; set; }= new List<RefreshToken>();
-	}
+
+		public ICollection<Review>? Reviews { get; set; }
+
+    }
 }

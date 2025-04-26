@@ -8,37 +8,32 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DripOut.Application.Services
 {
 	public class AuthenticationService
 	{
 		private readonly IIdentityService _identityService;
-		private readonly IJWTService _IJWTService;
+		private readonly IJWTService _iJWTService;
 
-		public AuthenticationService(IIdentityService identityService, IJWTService ijWTServicee)
+		public AuthenticationService(IIdentityService identityService, IJWTService iJWTServicee)
 		{
-			 _IJWTService= ijWTServicee;
+			_iJWTService = iJWTServicee;
 			_identityService = identityService;
 		}
 		public async Task<Result<AuthReturnDto>> RegisterAsync(RegisterDto model)
 		{
-			
-			var created = await _identityService.CreateUserAsync(model, Roles.User);
-			if (!created.IsSucceeded)
-				return Result<AuthReturnDto>.Failure(created.Errors.ToList());
 
-			
-			var jwtResult = await _IJWTService.GenerateJWTTokenAsync(model.Email!);
+			var createdUser = await _identityService.CreateUserAsync(model, Roles.User);
+			if (!createdUser.IsSucceeded)
+				return Result<AuthReturnDto>.Failure(createdUser.Errors);
+			var jwtResult = await _iJWTService.GenerateJWTTokenAsync(model.Email!);
 			if (!jwtResult.IsSucceeded)
-				return Result<AuthReturnDto>.Failure("Error generating JWT", jwtResult.Errors.ToList());
-
-			
-			var refreshResult = await _IJWTService.GenerateRefreshTokenAsync(model.Email!);
+				return Result<AuthReturnDto>.Failure(jwtResult.Message, jwtResult.Errors);
+			var refreshResult = await _iJWTService.GenerateRefreshTokenAsync(model.Email!);
 			if (!refreshResult.IsSucceeded)
-				return Result<AuthReturnDto>.Failure("Error generating Refresh Token", refreshResult.Errors.ToList());
-
-			
+				return Result<AuthReturnDto>.Failure(refreshResult.Message, refreshResult.Errors);
 			var result = new AuthReturnDto
 			{
 				Email = model.Email,
@@ -53,53 +48,65 @@ namespace DripOut.Application.Services
 
 		public async Task<Result<AuthReturnDto>> LoginAsync(LoginDto model)
 		{
-			var Logged = await _identityService.ValidateUserCredentialsAsync(model);
-			if (!Logged.IsSucceeded)
+			var logged = await _identityService.ValidateUserCredentialsAsync(model);
+			if (!logged.IsSucceeded)
 			{
-				return Result<AuthReturnDto>.Failure("Logged In Failed Email Or Password Is Wrong");
+				return Result<AuthReturnDto>.Failure(logged.Errors);
 			}
-			var AcessToken = await _IJWTService.GenerateJWTTokenAsync(model.Email);
-			if (!AcessToken.IsSucceeded)
+			var accessToken = await _iJWTService.GenerateJWTTokenAsync(model.Email!);
+			if (!accessToken.IsSucceeded)
 			{
-				return Result<AuthReturnDto>.Failure("Logged In Failed");
+				return Result<AuthReturnDto>.Failure(accessToken.Errors);
 			}
-			var RefreshToken = await _IJWTService.GenerateRefreshTokenAsync(model.Email);
-			if (!RefreshToken.IsSucceeded) { return Result<AuthReturnDto>.Failure("Logged In Failed"); }
+			var revokeOldToken = await _iJWTService.RevokeAllRefreshTokensByEmailAsync(model.Email);
+			if (!revokeOldToken.IsSucceeded)
+				return Result<AuthReturnDto>.Failure(revokeOldToken.Errors);
+			var refreshToken = await _iJWTService.GenerateRefreshTokenAsync(model.Email);
+			if (!refreshToken.IsSucceeded) { return Result<AuthReturnDto>.Failure(refreshToken.Errors); }
 
 			var result = new AuthReturnDto
 			{
 				Email = model.Email,
 				Password = model.Password,
 				Role = Roles.User,
-				RefreshToken = RefreshToken.RefreshToken,
-				Token = AcessToken.Token
+				RefreshToken = refreshToken.RefreshToken,
+				Token = accessToken.Token
 			};
 			return Result<AuthReturnDto>.Success(result, "Logged In Successfully");
 		}
-		public async Task<Result<AuthReturnDto>> AccessRefreshToken(string RefreshToken)
+		public async Task<Result<AuthReturnDto>> AccessRefreshToken(string refreshToken)
 		{
-			if (string.IsNullOrEmpty(RefreshToken))
+			if (string.IsNullOrEmpty(refreshToken))
 			{
-				return Result<AuthReturnDto>.Failure("Refresh token is required.");
+				return Result<AuthReturnDto>.Failure(  ["refreshToken Can not be null"]);
 			}
+			
+			var userfound = await _iJWTService.FindEmailByRefreshToken(refreshToken);
+			if (!userfound.IsSucceeded)
+				return Result<AuthReturnDto>.Failure(Errors:userfound.Errors);
 
-			var user = await _IJWTService.FindEmailByRefreshToken(RefreshToken);
-			if (user.IsSucceeded)
+			var token = await _iJWTService.GenerateJWTTokenAsync(userfound.Email!);
+			if (!token.IsSucceeded)
 			{
-				var token = await _IJWTService.GenerateJWTTokenAsync(user.Email);
-				if (!token.IsSucceeded)
-				{
-					return Result<AuthReturnDto>.Failure(token.Message);
-				}
-
-				var result = new AuthReturnDto
-				{
-					Token = token.Token
-				};
-				return Result<AuthReturnDto>.Success(result, "Token created successfully");
+				return Result<AuthReturnDto>.Failure(token.Errors);
 			}
-			else { return Result<AuthReturnDto>.Failure(user.Message, user.Errors.ToList()); };
+			var result = new AuthReturnDto
+			{	
+				Token = token.Token
+			};
+			return Result<AuthReturnDto>.Success(result, "Token created successfully");
+		}
 
+
+
+		public async Task<Result> LogOutAsync(string refreshToken)
+		{
+			if (string.IsNullOrEmpty(refreshToken))
+				return Result.Failure(Errors: ["RefreshToken can not be Null"]);
+			var tokenRevoked = await _iJWTService.RevokeRefreshTokenAsync(refreshToken);
+			if (!tokenRevoked.IsSucceeded)
+				return Result.Failure( tokenRevoked.Errors);
+			return Result.Success();
 		}
 
 	}

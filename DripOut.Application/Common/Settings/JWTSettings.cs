@@ -9,7 +9,7 @@ namespace DripOut.Application.Common.Settings
 	public class JWTSettings
 	{
 		public string? SignInKey { set; get; }
-		public string? Audiance { set; get; }
+		public string? Audience { set; get; }
 		public string? Issuer { set; get; }
 		public string AccessTokenExpiryInMinutes { set; get; } = "10";
 

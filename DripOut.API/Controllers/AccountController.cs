@@ -21,8 +21,7 @@ namespace DripOut.API.Controllers
 			_authService = authService;
 		}
 
-		[HttpPost]
-		[Route("Register")]
+		[HttpPost("Register")]
 		public async Task<IActionResult> Register([FromBody] RegisterDto model)
 		{
 			if (!ModelState.IsValid)
@@ -32,15 +31,18 @@ namespace DripOut.API.Controllers
 			var created = await _authService.RegisterAsync(model);
 			if (created.IsSucceeded)
 			{
-				return Ok(created.Data);
+				return Ok(new
+				{
+					token = created.Data!.Token,
+					refreshToken= created.Data!.RefreshToken
+				});
 			}
 			else
 			{
-				return BadRequest(new{ Errors = string.Join(",", created.Errors) });
+				return BadRequest(new { errors = created.Errors });
 			}
 		}
-		[HttpPost]
-		[Route("Login")]
+		[HttpPost("Login")]
 		public async Task<IActionResult> Login([FromBody] LoginDto model)
 		{
 			if (!ModelState.IsValid)
@@ -62,32 +64,26 @@ namespace DripOut.API.Controllers
 		[Route("GenrateAccessToken")]
 		public async Task<IActionResult> GenrateAccessToken([FromBody] string RefreshToken)
 		{
-			if (RefreshToken == null)
+			if (RefreshToken != null)
 			{
-				return BadRequest("The Feild RefreshToken Can't be Empty ");
-			}
-			else
-			{
-				var token = await _authService.AccessRefreshToken(RefreshToken);
-				if (token.IsSucceeded)
-				{
-					return Ok(token.Data.Token);
-				}
-				else
+				var result = await _authService.AccessRefreshToken(RefreshToken);
+				if (!result.IsSucceeded)
 				{
 					return BadRequest(
 					new
 					{
-							message = token.Message,
-							data = token.Data.Token
+						message = result.Errors
 					});
-					
 				}
-
+				return Ok(new
+				{
+					token = result.Data!.Token
+				});
 			}
-
+			return BadRequest(new { error = "RefreshToken Can't be NULL" });
 		}
-		[HttpGet("TryTokens")]
+
+		[HttpPost("TryTokens")]
 		[Authorize]
 		public  IActionResult  TryTokens()
 		{
@@ -97,8 +93,24 @@ namespace DripOut.API.Controllers
 			});
 		}
 
+		[HttpPost]
+		[Route("LogOut")]
+		public async Task<IActionResult> LogOut([FromBody] string RefreshToken)
+		{
+
+			if (RefreshToken == null)
+				return BadRequest(new { error = "RefreshToken Can not be Null" });
+			else
+			{
+				var result = await _authService.LogOutAsync(RefreshToken!);
+				if (!result.IsSucceeded)
+					return BadRequest(new { message = "failure" });
+				return Ok(new { message = "success" });
+
+			}
 
 
+		}
 	}
 }
 

@@ -22,7 +22,7 @@ namespace DripOut.Infrastructure
 			{
 				var user = new AppUser
 				{
-					UserName = model.Email,
+					UserName = Guid.NewGuid().ToString(),
 					Email = model.Email,
 					FirstName = model.FirstName,
 					LastName = model.LastName
@@ -34,15 +34,15 @@ namespace DripOut.Infrastructure
 					var roleSuccess = await _userManager.AddToRoleAsync(user, role);
 					if (roleSuccess.Succeeded)
 					{
-						return new IdentityDto { User = user, IsSucceeded = true };
+						return new IdentityDto { Email = user.Email, IsSucceeded = true };
 					}
-					return new IdentityDto { IsSucceeded = false, Errors = roleSuccess.Errors.Select(e => e.Description) };
+					return new IdentityDto { IsSucceeded = false, Errors = roleSuccess.Errors.Select(x => x.Description).ToList() };
 				}
-				return new IdentityDto { IsSucceeded = false, Errors = result.Errors.Select(e => e.Description) };
+				return new IdentityDto { IsSucceeded = false, Errors = result.Errors.Select(e => e.Description).ToList() };
 			}
 			catch (Exception ex)
 			{
-				return new IdentityDto { IsSucceeded = false, Errors = new List<string> { ex.Message } };
+				return new IdentityDto { IsSucceeded = false, Errors = { ex.Message } };
 			}
 
 		}
@@ -50,36 +50,46 @@ namespace DripOut.Infrastructure
 		{
 			try
 			{
-				var result = await _signInManager.PasswordSignInAsync(model.Email!,model.Password!, isPersistent: false, lockoutOnFailure: false);
-				if (result.Succeeded) { return new IdentityDto { IsSucceeded = true }; }
-				else { return new IdentityDto { IsSucceeded = false  }; }
+				//var result = await _signInManager.PasswordSignInAsync(model.Email!, model.Password!, isPersistent: false, lockoutOnFailure: false);
+				var found = await _userManager.FindByEmailAsync(model.Email!);
+				if (found == null)
+					return new IdentityDto { IsSucceeded = false, Errors = { "Invalid email or password" } };
+
+				var result = await _signInManager.CheckPasswordSignInAsync(found, model.Password!, false);
+
+				if (result.Succeeded)
+				{ return new IdentityDto { IsSucceeded = true, Email = model.Email }; }
+				else
+				{ return new IdentityDto { IsSucceeded = false, Errors = { "An error occurred while Loging in" } }; }
+
 			}
 			catch (Exception ex)
 			{
 				return new IdentityDto
 				{
 					IsSucceeded = false,
-					Errors = new List<string> { ex.Message }
+					Errors = { "An error occurred while Loging in " + ex.Message }
 				};
 			}
 		}
-		public async Task<IdentityDto> FindUserByEmailAsync(RegisterDto model)
+		public async Task<IdentityDto> FindUserByEmailAsync(string email)
 		{
+			if (string.IsNullOrEmpty(email))
+				return new IdentityDto { IsSucceeded = false, Errors = { "Email Can Not Be Null" } };
+
 			try
 			{
-				var found = await _userManager.FindByEmailAsync(model.Email!);
-				if (found is not null)
-				{
-					return new IdentityDto { IsSucceeded = true };
-				}
-				else { return new IdentityDto {User=found, IsSucceeded = true }; }
+				var found = await _userManager.FindByEmailAsync(email);
+				if (found != null) return new IdentityDto { IsSucceeded = true };
+				else { return new IdentityDto { Email = found!.Email, IsSucceeded = true }; }
 			}
+
 			catch (Exception ex)
 			{
 				return new IdentityDto
 				{
 					IsSucceeded = false,
-					Errors = new List<string> { ex.Message }
+					Errors = { ex.Message }
 				};
 			}
 		}

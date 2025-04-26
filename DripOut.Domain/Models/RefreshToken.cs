@@ -8,16 +8,17 @@ namespace DripOut.Domain.Models
 {
 	public class RefreshToken
 	{
-		public int Id { get; set; } 
-		public string Token { get; set; }
-		public DateTime CreatedOn { get; private set; } = DateTime.UtcNow;
-		public DateTime ExpiresOn { get; private set; } = DateTime.UtcNow.AddDays(7);
+		public int Id { get; set; }	
+		public string Token { get; set; } = string.Empty;
+		public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+		public DateTime ExpiresOn { get; set; } = DateTime.UtcNow.AddDays(7);
 		public DateTime? RevokedOn { get; set; }
 
-		public bool IsExpired => DateTime.UtcNow >= ExpiresOn;
-		public bool IsActive => RevokedOn == null && !IsExpired;
+		// This is a computed property that EF Core can't translate to SQL
+		public bool IsActive => RevokedOn == null && DateTime.UtcNow <= ExpiresOn;
 
-		public string AppUserId { get; set; }
-		public AppUser AppUser { get; set; }
+		// Navigation properties
+		public string AppUserId { get; set; } = string.Empty;
+		public AppUser? AppUser { get; set; }
 	}
 }

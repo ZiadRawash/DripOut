@@ -11,7 +11,7 @@ namespace DripOut.Application.Interfaces.Services
 	public interface IIdentityService
 	{
 		Task<IdentityDto> CreateUserAsync(RegisterDto model, string role);
-		Task<IdentityDto> ValidateUserCredentialsAsync (LoginDto model);
-		Task<IdentityDto> FindUserByEmailAsync(RegisterDto model);
+		Task<IdentityDto> ValidateUserCredentialsAsync(LoginDto model);
+		Task<IdentityDto> FindUserByEmailAsync(string email);
 	}
 }

@@ -2,8 +2,9 @@ using DripOut.Application.Common.Settings;
 using DripOut.Application.Interfaces.Services;
 using DripOut.Application.Services;
 using DripOut.Domain.Models;
-using DripOut.Infrastructure;
+using DripOut.Infrastructure.Implementaion;
 using DripOut.Persistence;
+using DripOut.Persistence.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,13 @@ builder.Services.AddTransient<IIdentityService, IdentityService>();
 builder.Services.AddTransient<IJWTService, JWTService>();
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JWTSettings"));
 builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddScoped<IProductService,ProductSrevice>();
+builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>) );
+
+builder.Services.AddControllers().AddNewtonsoftJson(options =>
+		options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

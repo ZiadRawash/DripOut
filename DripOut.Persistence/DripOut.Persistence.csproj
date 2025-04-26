@@ -21,7 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DripOut.Domain\DripOut.Domain.csproj" />
+	  <ProjectReference Include="..\DripOut.Domain\DripOut.Domain.csproj" />
+	  <ProjectReference Include="..\DripOut.Application\DripOut.Application.csproj" />
+
   </ItemGroup>
 
 </Project>

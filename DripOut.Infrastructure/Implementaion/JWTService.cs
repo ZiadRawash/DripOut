@@ -14,7 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DripOut.Infrastructure
+namespace DripOut.Infrastructure.Implementaion
 {
 	
 	public class JWTService : IJWTService
@@ -77,11 +77,11 @@ namespace DripOut.Infrastructure
 				var secToken = tokenHandler.CreateToken(descriptor);
 				var token = tokenHandler.WriteToken(secToken);
 
-				return (new JwtResponseDto { Token = token, IsSucceeded = true });
+				return new JwtResponseDto { Token = token, IsSucceeded = true };
 			}
 			catch (Exception ex)
 			{
-				return (new JwtResponseDto { IsSucceeded = false, Errors = { "Error generating token: " + ex.Message } });
+				return new JwtResponseDto { IsSucceeded = false, Errors = { "Error generating token: " + ex.Message } };
 			}
 		}
 
@@ -124,7 +124,7 @@ namespace DripOut.Infrastructure
 			}
 			catch (Exception ex)
 			{
-				return (new JwtResponseDto { IsSucceeded = false, Errors = { "Error Happend with RefreshToken Generating" + ex.Message } });
+				return new JwtResponseDto { IsSucceeded = false, Errors = { "Error Happend with RefreshToken Generating" + ex.Message } };
 			}
 		}
 
@@ -159,11 +159,11 @@ namespace DripOut.Infrastructure
 						Message = "Token is no longer active"
 					};
 				}
-				return (new JwtResponseDto { IsSucceeded = true, Email = user.Email });
+				return new JwtResponseDto { IsSucceeded = true, Email = user.Email };
 			}
 			catch (Exception ex)
 			{
-				return (new JwtResponseDto { IsSucceeded = false, Errors = { ex.Message } });
+				return new JwtResponseDto { IsSucceeded = false, Errors = { ex.Message } };
 			}
 		}
 

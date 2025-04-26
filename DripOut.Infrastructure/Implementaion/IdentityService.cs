@@ -4,7 +4,7 @@ using DripOut.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;
 
-namespace DripOut.Infrastructure
+namespace DripOut.Infrastructure.Implementaion
 {
 	public class IdentityService : IIdentityService
 	{

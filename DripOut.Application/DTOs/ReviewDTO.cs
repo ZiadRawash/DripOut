@@ -1,27 +1,25 @@
-﻿using System;
+﻿using DripOut.Domain.Models.Entities;
+using DripOut.Domain.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DripOut.Application.DTOs.Account;
 
-namespace DripOut.Domain.Models.Entities
+namespace DripOut.Application.DTOs
 {
-    public class Review
+    public class ReviewDTO
     {
-        public int Id { get; set; }
 
         [Required, MaxLength(1000)]
         public string ReviewText { get; set; } = default!;
-
+        [Range(0,5)]
         public double Stars { get; set; } = 1;
-
-        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
-
+        public DateTime CreatedOn { get; set; }
         public int ProductId { get; set; }
-        public Product? Product { get; set; }
+        public UserDTO User { get; set; } = default!;
 
-        public string AppUserId { get; set; }
-        public AppUser? User { get; set; }
     }
 }

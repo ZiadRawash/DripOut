@@ -61,8 +61,8 @@ namespace DripOut.Persistence.Repositories
             return await query.FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<T>>? FindAllAsync(Expression<Func<T, bool>> expression,
-          params Expression<Func<T, object>>[] includes)
+        public async Task<IEnumerable<T>>? GetAllAsync(Expression<Func<T, bool>> expression,
+           params Expression<Func<T, object>>[] includes)
         {
             var query = dbSet.Where(expression);
             foreach(var include in includes)
@@ -71,5 +71,8 @@ namespace DripOut.Persistence.Repositories
             }
             return await query.ToListAsync();
         }
+
+        public  IQueryable<T> GetAll(Expression<Func<T, bool>> expression)
+            =>  dbSet.Where(expression);
     }
 }

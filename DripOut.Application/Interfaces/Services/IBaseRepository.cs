@@ -16,7 +16,8 @@ namespace DripOut.Application.Interfaces.Services
         public Task<T>? FindAsync(Expression<Func<T, bool>> expression ,
           params Expression<Func<T,object>>[] includes);
 
-        public Task<IEnumerable<T>>? FindAllAsync(Expression<Func<T,bool>> expression,
-          params Expression<Func<T,object>>[] includes);
+        public Task<IEnumerable<T>>? GetAllAsync(Expression<Func<T, bool>> expression,
+          params Expression<Func<T, object>>[] includes);
+        public IQueryable<T> GetAll(Expression<Func<T, bool>> expression);
     }
 }

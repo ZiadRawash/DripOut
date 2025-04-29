@@ -2,6 +2,8 @@ using DripOut.Application.Common.Settings;
 using DripOut.Application.Interfaces.Services;
 using DripOut.Application.Services;
 using DripOut.Domain.Models;
+using DripOut.Application.DTOs;
+using DripOut.Domain.Models.Entities;
 using DripOut.Infrastructure.Implementaion;
 using DripOut.Persistence;
 using DripOut.Persistence.Repositories;
@@ -14,12 +16,13 @@ using System.Security.Principal;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddTransient<IIdentityService, IdentityService>();
 builder.Services.AddTransient<IJWTService, JWTService>();
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JWTSettings"));
 builder.Services.AddScoped<AuthenticationService>();
-builder.Services.AddScoped<IProductService,ProductSrevice>();
 builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>) );
+builder.Services.AddScoped<IProductService,ProductService>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 		options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);

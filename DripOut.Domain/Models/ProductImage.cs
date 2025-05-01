@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace DripOut.Domain.Models
+
 {
     public class ProductImage
     {

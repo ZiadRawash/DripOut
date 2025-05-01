@@ -12,7 +12,6 @@ using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Principal;
 using DripOut.Application.Interfaces;
-using DripOut.Application.Interfaces.Services;
 using DripOut.Application.Interfaces.ReposInterface;
 var builder = WebApplication.CreateBuilder(args);
 

@@ -7,8 +7,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 namespace DripOut.Domain.Models
+
 {
     public class ProductVariant
     {
@@ -23,4 +23,4 @@ namespace DripOut.Domain.Models
         public virtual Product? Product { get; set; }
     }
 }
-    
+

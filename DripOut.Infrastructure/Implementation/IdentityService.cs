@@ -1,5 +1,5 @@
 ﻿using DripOut.Application.DTOs.Account;
-using DripOut.Application.Interfaces.Services;
+using DripOut.Application.Interfaces;
 using DripOut.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using System.Threading.Tasks;

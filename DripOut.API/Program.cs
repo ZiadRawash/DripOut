@@ -1,5 +1,4 @@
 using DripOut.Application.Common.Settings;
-using DripOut.Application.Interfaces.Services;
 using DripOut.Application.Services;
 using DripOut.Domain.Models;
 using DripOut.Application.DTOs;
@@ -13,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Principal;
+using DripOut.Application.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

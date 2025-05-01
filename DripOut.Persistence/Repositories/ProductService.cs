@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using DripOut.Application.DTOs;
-using DripOut.Application.Interfaces.Services;
+using DripOut.Application.Interfaces;
 using DripOut.Domain.Consts;
 using DripOut.Domain.Models.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -11,28 +11,23 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DripOut.Application.Services
+namespace DripOut.Persistence.Repositories
 {
-    public class ProductService : IProductService
+    public class ProductService : BaseRepository<Product>, IProductService
     {
         public IBaseRepository<Product> _repo;
         private readonly IMapper _mapper;
-        public ProductService(IBaseRepository<Product> repo,IMapper mapper)
+        public ProductService(IBaseRepository<Product> repo,IMapper mapper 
+            , ApplicationDbContext context) :base(context)
         {
             _repo = repo;
             _mapper = mapper;
         }
 
-        public async Task<Product> AddAsync(Product product) => await _repo.AddAsync(product);
-
-        public async Task<Product> FindAsync(int id) => await _repo.FindAsync(id)!;
-
         public async Task<EntityPage<ProductsDTO>> GetAllAsync(string search = "",int categoryId = 0, int crntPage = 1, int pageSize = 10)
         {
-
-            var Products =  _repo.GetAll(p => categoryId == 0 ? p.Id > 0 : p.CategoryId == categoryId)
-                .Include(p => p.Category).Include(p => p.Reviews)!.ThenInclude(u => u.User).ToList();
-            //Products.AsQueryable().Include(r => r.Reviews)!.ThenInclude(u=>u.User);
+            var Products = await  _repo.GetAll(p => categoryId == 0 ? p.Id > 0 : p.CategoryId == categoryId)
+                .Include(p => p.Category).Include(p => p.Reviews)!.ThenInclude(u => u.User).ToListAsync();
             if (!string.IsNullOrEmpty(search))
             {
                 search = search.ToLower();
@@ -50,8 +45,5 @@ namespace DripOut.Application.Services
             return EntityPage;
         }
 
-        public async Task<Product> FindAsync(Expression<Func<Product, bool>> expression
-            , params Expression<Func<Product, object>>[] includes)
-        => await _repo.FindAsync(expression, includes)!;
     }
 }

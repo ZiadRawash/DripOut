@@ -1,6 +1,7 @@
 ﻿using DripOut.Application.DTOs;
-using DripOut.Application.Interfaces.Services;
+using DripOut.Application.Interfaces;
 using DripOut.Domain.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -9,6 +10,7 @@ namespace DripOut.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategroyController : ControllerBase
     {
         private readonly IBaseRepository<Category> _repo;

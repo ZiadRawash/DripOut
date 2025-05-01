@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using DripOut.Application.DTOs;
-using DripOut.Application.Interfaces.Services;
+using DripOut.Application.Interfaces;
 using DripOut.Domain.Models;
 using DripOut.Domain.Models.Entities;
 
@@ -15,7 +15,7 @@ namespace DripOut.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ProductController : ControllerBase
     {
         private readonly IProductService _prdService;

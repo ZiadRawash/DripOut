@@ -12,7 +12,8 @@ namespace DripOut.Domain.Models.Entities
         public int Id { get; set; }
 
         [Required, MaxLength(1000)]
-        public string ReviewText { get; set; } = default!;
+        public string ReviewText { get; set; } = null!;
+
 
         public double Stars { get; set; } = 1;
 

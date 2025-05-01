@@ -1,5 +1,5 @@
 ﻿using DripOut.Application.DTOs;
-using DripOut.Application.Interfaces.Services;
+using DripOut.Application.Interfaces;
 using DripOut.Domain.Models;
 using DripOut.Domain.Models.Entities;
 using Microsoft.AspNetCore.Authorization;

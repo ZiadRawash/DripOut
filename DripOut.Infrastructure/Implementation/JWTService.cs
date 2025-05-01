@@ -1,6 +1,7 @@
 ﻿using DripOut.Application.Common.Settings;
 using DripOut.Application.DTOs.Account;
 using DripOut.Application.Interfaces;
+using DripOut.Application.Interfaces.Services;
 using DripOut.Domain.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;

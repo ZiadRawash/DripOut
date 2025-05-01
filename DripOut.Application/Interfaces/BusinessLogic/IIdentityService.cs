@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DripOut.Application.Interfaces
+namespace DripOut.Application.Interfaces.BussinessLogic
 {
 	public interface IIdentityService
 	{

@@ -13,6 +13,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Principal;
 using DripOut.Application.Interfaces;
 using DripOut.Application.Interfaces.ReposInterface;
+using DripOut.Application.Interfaces.Services;
+using DripOut.Application.Interfaces.BussinessLogic;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

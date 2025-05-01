@@ -1,12 +1,12 @@
 ﻿using DripOut.Application.DTOs.Account;
-using DripOut.Application.Services;
+using DripOut.Application.BusinessLogic;
 using DripOut.Domain.Consts;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static System.Runtime.InteropServices.JavaScript.JSType;
-using AuthenticationService = DripOut.Application.Services.AuthenticationService;
+using AuthenticationService = DripOut.Application.BusinessLogic.AuthenticationService;
 
 namespace DripOut.API.Controllers
 {

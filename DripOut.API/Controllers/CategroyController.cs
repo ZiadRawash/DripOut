@@ -1,6 +1,8 @@
 ﻿using DripOut.Application.DTOs;
-using DripOut.Application.Interfaces.Services;
-using DripOut.Domain.Models.Entities;
+using DripOut.Application.Interfaces;
+using DripOut.Application.Interfaces.ReposInterface;
+using DripOut.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -9,12 +11,13 @@ namespace DripOut.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CategroyController : ControllerBase
     {
         private readonly IBaseRepository<Category> _repo;
-        private readonly IProductService _prdService;
+        private readonly IProductRepository _prdService;
 
-        public CategroyController(IBaseRepository<Category> repo, IProductService prdService)
+        public CategroyController(IBaseRepository<Category> repo, IProductRepository prdService)
         {
             _repo = repo;
             _prdService = prdService;
@@ -37,7 +40,7 @@ namespace DripOut.API.Controllers
             {
                 Id = category.Id,
                 Name = category.Name,
-                ProductsPage = await _prdService.GetAllAsync(search, id, crntPage, pageSize)
+           //     ProductsPage = await _prdService.GetAllAsync(search, id, crntPage, pageSize)
             };
             return Ok(output);
         }

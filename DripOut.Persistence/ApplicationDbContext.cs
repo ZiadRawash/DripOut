@@ -1,5 +1,4 @@
 ﻿using DripOut.Domain.Models;
-using DripOut.Domain.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -40,9 +39,6 @@ namespace DripOut.Persistence
 				.HasForeignKey(r => r.AppUserId)
 				.OnDelete(DeleteBehavior.Cascade);
 
-            builder.Entity<Product>()
-                .Property(p => p.Photo)
-                .HasColumnType("varbinary(max)");
         }
 		public DbSet<Product> Products { get; set; }
 		public DbSet<Category> Categories { get; set; }

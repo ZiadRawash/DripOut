@@ -5,14 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DripOut.Domain.Models.Entities
+namespace DripOut.Domain.Models
 {
     public class Review
     {
         public int Id { get; set; }
 
         [Required, MaxLength(1000)]
-        public string ReviewText { get; set; } = default!;
+        public string ReviewText { get; set; } = null!;
+
 
         public double Stars { get; set; } = 1;
 

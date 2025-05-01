@@ -14,7 +14,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DripOut.Infrastructure.Implementaion
+namespace DripOut.Infrastructure.Implementation
 {
 	
 	public class JWTService : IJWTService

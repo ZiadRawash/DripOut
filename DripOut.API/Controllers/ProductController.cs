@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
 using DripOut.Application.DTOs;
-using DripOut.Application.Interfaces.Services;
+using DripOut.Application.Interfaces;
+using DripOut.Application.Interfaces.ReposInterface;
 using DripOut.Domain.Models;
-using DripOut.Domain.Models.Entities;
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -15,18 +14,17 @@ namespace DripOut.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
+
     public class ProductController : ControllerBase
     {
-        private readonly IProductService _prdService;
-        private readonly SignInManager<AppUser> _signInManager;
+        private readonly IProductRepository _prdService;
         private readonly IMapper _mapper;
 
-        public ProductController(IProductService prdService, SignInManager<AppUser> signInManager
+        public ProductController(IProductRepository prdService, SignInManager<AppUser> signInManager
             , IMapper mapper)
         {
             _prdService = prdService;
-            _signInManager = signInManager;
             _mapper = mapper;
         }
 
@@ -37,11 +35,7 @@ namespace DripOut.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> FindAsync(int id)
         {
-            var product = await _prdService.FindAsync(p => p.Id == id, p => p.Category!, p => p.Reviews!);
-            foreach (var rev in product.Reviews!)
-            {
-                rev.User = await _signInManager.UserManager.FindByIdAsync(rev.AppUserId);
-            }
+            var product = await _prdService.FindAsync(p => p.Id == id, p => p.Category!, p => p.Reviews!)!;
             if (product == null)
                 return NotFound("No Such Id");
 

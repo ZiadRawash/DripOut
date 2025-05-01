@@ -1,7 +1,7 @@
 ﻿using DripOut.Application.DTOs;
-using DripOut.Application.Interfaces.Services;
+using DripOut.Application.Interfaces;
+using DripOut.Application.Interfaces.ReposInterface;
 using DripOut.Domain.Models;
-using DripOut.Domain.Models.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -16,12 +16,12 @@ namespace DripOut.API.Controllers
     public class ReviewController : ControllerBase
     {
         private readonly IBaseRepository<Review> _repo;
-        private readonly IProductService _productService;
+        private readonly IProductRepository _productService;
         private readonly SignInManager<AppUser> _signInManager;
 
         public ReviewController(IBaseRepository<Review> repo 
                                 , SignInManager<AppUser> signInManager
-                                 ,   IProductService productService  )
+                                 , IProductRepository productService  )
         {
             _repo = repo;
             _signInManager = signInManager;

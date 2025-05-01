@@ -2,7 +2,7 @@
 using DripOut.Application.DTOs;
 using DripOut.Application.DTOs.Account;
 using DripOut.Domain.Models;
-using DripOut.Domain.Models.Entities;
+
 
 namespace DripOut.Application.DTOs
 {

@@ -1,4 +1,4 @@
-﻿using DripOut.Domain.Models.Entities;
+﻿using DripOut.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
-namespace DripOut.Domain.Models.Entities
+namespace DripOut.Domain.Models
 {
     public class Product
     {
@@ -18,27 +18,20 @@ namespace DripOut.Domain.Models.Entities
         [Required, MaxLength(100)]
         public string Title { get; set; } = null!;
 
-        [MaxLength(1000)]
+        [MaxLength(500)]
         public string? Description { get; set; }
 
         [Required , Precision(18,2)]
         public decimal Price { get; set; }
 
-        public int Amount { get; set; }
-
-        [Required, MaxLength(20)]
-        public string Size { get; set; } = null!;
-
-        [Required, MaxLength(30)]
-        public string Color { get; set; } = null!;
-
         public double Discount { get; set; } = 0;
 
+        [Range(0,5)]
         public float Rate { get; set; } = 0;
 
-        public byte[]? Photo { get; set; }
+        public virtual ICollection<ProductVariant>? Variants { get; set; }
+        public virtual ICollection<ProductImage>? Images { get; set; }
 
-        [JsonIgnore]
         public int CategoryId { get; set; }
         public Category? Category { get; set; }
 

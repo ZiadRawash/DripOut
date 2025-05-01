@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace DripOut.Application.Services
+namespace DripOut.Application.BusinessLogic
 {
 	public class AuthenticationService
 	{

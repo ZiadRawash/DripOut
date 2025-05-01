@@ -1,8 +1,7 @@
 ﻿using DripOut.Application.DTOs;
-using DripOut.Application.Interfaces.Services;
+using DripOut.Application.Interfaces;
+using DripOut.Application.Interfaces.ReposInterface;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace DripOut.Persistence.Repositories
@@ -54,12 +53,21 @@ namespace DripOut.Persistence.Repositories
             ,params Expression<Func<T, object>>[] includes)
         {
             var query = dbSet.Where(expression);
-            foreach(var include in includes)
+            if (query != null)
             {
-                query = query.Include(include);
+                if (includes != null)
+                {
+                    foreach (var include in includes)
+                    {
+                        query = query.Include(include);
+                    }
+
+                    return await query.FirstAsync();
+                }
+				return await query.FirstAsync();
             }
-            return await query.FirstOrDefaultAsync();
-        }
+            return (null!);
+		}
 
         public async Task<IEnumerable<T>>? GetAllAsync(Expression<Func<T, bool>> expression,
            params Expression<Func<T, object>>[] includes)

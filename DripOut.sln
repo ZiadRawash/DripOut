@@ -12,9 +12,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DripOut.Domain", "DripOut.Domain\DripOut.Domain.csproj", "{0EC3106C-6747-4AEC-944B-4B61D84AE99C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DripOut.Application", "DripOut.Application\DripOut.Application.csproj", "{529526FF-DC2A-49FC-81A8-D5D9B8E1E93C}"
-	ProjectSection(ProjectDependencies) = postProject
-		{1C451626-B2F1-4BE1-BAE2-2CA6EE994B0C} = {1C451626-B2F1-4BE1-BAE2-2CA6EE994B0C}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DripOut.Infrastructure", "DripOut.Infrastructure\DripOut.Infrastructure.csproj", "{148856D3-813A-4528-96B4-2FE3977B7D33}"
 	ProjectSection(ProjectDependencies) = postProject

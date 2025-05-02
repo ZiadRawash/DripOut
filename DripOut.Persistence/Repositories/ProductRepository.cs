@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using DripOut.Application.DTOs;
-using DripOut.Application.Interfaces;
+using DripOut.Application.DTOs.Products;
+using DripOut.Application.Helpers;
 using DripOut.Application.Interfaces.ReposInterface;
-using DripOut.Domain.Consts;
+using DripOut.Application.Mappers;
 using DripOut.Domain.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,49 +25,41 @@ namespace DripOut.Persistence.Repositories
             _context = context;
         }
 
-		public async Task<EntityPage<Product>> GetAllAsync(string search = "", int categoryId = 0, int crntPage = 1, int pageSize = 10)
+		public async Task<EntityPage<Product>> GetAllAsync(QueryModel queryModel)
 		{
 
-			var query = _context.Products.AsQueryable();
+			var query = _context.Products.Include(p => p.Variants).Include(p => p.Images).AsQueryable();
+
+            //Filtering
+            query = query.WhereIf(queryModel.CategoryID != 0, p => p.CategoryId == queryModel.CategoryID)
+				.WhereIf(!queryModel.search.IsNullOrEmpty(), p => p.Title.ToLower().Contains(queryModel.search))
+				.WhereIf(!queryModel.Size.IsNullOrEmpty(), p => p.Variants!.Any(v => v.Size == queryModel.Size))
+                .Where(p => p.Price >= queryModel.MinPrice && p.Price <= queryModel.MaxPrice);
+			//Sorting
+			if (queryModel.OrderBy.IsNullOrEmpty())
+				query = query.OrderByDescending(p => p.Id);
+			else if(queryModel.OrderBy == "ASC")
+                query = query.OrderBy(p => p.Price);
+			else
+                query = query.OrderByDescending(p => p.Price);
+
+            var totalCount = await query.CountAsync();
 
 
-			if (categoryId > 0)
-			{
-				query = query.Where(p => p.CategoryId == categoryId);
-			}
-
-
-			if (!string.IsNullOrEmpty(search))
-			{
-				var searchLower = search.ToLower();
-				query = query.Where(p => p.Title.ToLower().StartsWith(searchLower));
-			}
-
-
-			query = query
-				.Include(p => p.Category)
-				.Include(p => p.Reviews)!
-				.ThenInclude(u => u.User);
-
-
-			var totalCount = await query.CountAsync();
-
-
-			var products = await query
-				.OrderBy(p => p.Id)
-				.Skip((crntPage - 1) * pageSize)
-				.Take(pageSize)
+			var products = query
+				.Skip((queryModel.Page - 1) * queryModel.PageSize)
+				.Take(queryModel.PageSize)
 				.ToListAsync();
 
 
 			// Create the page result
 			var entityPage = new EntityPage<Product>
 			{
-				Items = products,
-				CurrentPage = crntPage,
-				PageSize = pageSize,
-				TotalSize = totalCount,
-				TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+				Items = await products,
+				CurrentPage = queryModel.Page,
+				PageSize = queryModel.PageSize,
+				Count = totalCount,
+				TotalPages = (int)Math.Ceiling(totalCount / (double)queryModel.PageSize)
 			};
 
 			return entityPage;

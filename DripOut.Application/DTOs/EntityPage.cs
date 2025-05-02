@@ -11,7 +11,7 @@ namespace DripOut.Application.DTOs
         public IEnumerable<T>? Items;
         public int CurrentPage;
         public int PageSize;
-        public int TotalSize;
+        public int Count;
         public int TotalPages;
     }
 }

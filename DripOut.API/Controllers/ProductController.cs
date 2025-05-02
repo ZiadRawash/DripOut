@@ -1,53 +1,87 @@
 ﻿using AutoMapper;
+using DripOut.Application.DTOs;
 using DripOut.Application.DTOs.Products;
+using DripOut.Application.Helpers;
 using DripOut.Application.Interfaces.ReposInterface;
+using DripOut.Application.Mappers;
 using DripOut.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 
 namespace DripOut.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
 
     public class ProductController : ControllerBase
     {
-        private readonly IProductRepository _prdService;
-        private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ProductController(IProductRepository prdService
-            , IMapper mapper)
+        public ProductController(IUnitOfWork unitOfWork)
         {
-            _prdService = prdService;
-            _mapper = mapper;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string search = "", int crntPage = 1, int pageSize = 10)
-            => Ok(await _prdService.GetAllAsync(search,0, crntPage, pageSize));
+        public async Task<IActionResult> Index([FromQuery] QueryModel queryModel)
+        {
+            var productsPage = await _unitOfWork.Products.GetAllAsync(queryModel);
+            var productsDTO = productsPage.MapToProductDTO();
+            if (productsPage.Items == null)
+                return NotFound("No Products Found");
+            return Ok(productsDTO);
+        }
+            
 
         [HttpGet("{id}")]
         public async Task<IActionResult> FindAsync(int id)
         {
-            var product = await _prdService.FindAsync(p => p.Id == id, p => p.Category!, p => p.Reviews!)!;
+            var product = await _unitOfWork.Products.FindAsync(p=>p.Id == id,
+                p => p.Variants!,
+                p => p.Images!,
+                p => p.Reviews!);
             if (product == null)
                 return NotFound("No Such Id");
+            return Ok(product);
 
-            return Ok(_mapper.Map<ProductsDTO>(product));
+        }
+        [HttpGet("Reviews/{productId:int}")]
+        public async Task<IActionResult> GetReviewsAsync(int productId)
+        {
+            var reviews = await _unitOfWork.Reviews.GetAllAsync(r => r.ProductId == productId,r =>r.User!);
+            if (reviews == null)
+                return NotFound("No Reviews Found");
+            return Ok(reviews.Select(r => r.MapToDTO()));
+            
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddAsync(Product product)
+        public async Task<IActionResult> AddAsync(ProductInputDTO productDTO)
         {
-            if (product == null)
+            if (productDTO == null)
                 return BadRequest();
-            var newProduct = await _prdService.AddAsync(product);
-            return CreatedAtAction(nameof(FindAsync), new { id = newProduct.Id }, newProduct);
+            var product = productDTO.MapToProduct();
+            await _unitOfWork.Products.AddAsync(product);
+            return CreatedAtAction(nameof(FindAsync), new { id = product.Id }, product);
+        }
+
+        [HttpPost("Size")]
+        public async Task<IActionResult> AddSizeAsync(VariantInputDTO variantDTO)
+        {
+            var variant = variantDTO.MapToProductVariant();
+            var product = await _unitOfWork.Products.FindAsync(p => p.Id == variant.ProductId);
+            if (product == null)
+                return NotFound("No Such Id");
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+            product.Amount += variant.StockQuantity;
+            await _unitOfWork.Products.UpdateAsync(product);
+            await _unitOfWork.Variants.AddAsync(variant);
+            return Created();
         }
 
         //[HttpPut("{id}")]

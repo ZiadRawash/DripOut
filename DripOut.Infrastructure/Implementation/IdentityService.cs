@@ -3,6 +3,7 @@ using DripOut.Application.Interfaces;
 using DripOut.Application.Interfaces.Services;
 using DripOut.Domain.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
 namespace DripOut.Infrastructure.Implementation
@@ -94,5 +95,6 @@ namespace DripOut.Infrastructure.Implementation
 				};
 			}
 		}
-	}
+
+    }
 }

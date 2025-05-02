@@ -1,5 +1,4 @@
-﻿using DripOut.Application.DTOs;
-
+﻿using DripOut.Application.DTOs.Reviews;
 using DripOut.Application.Interfaces.ReposInterface;
 
 using DripOut.Domain.Models;
@@ -16,41 +15,31 @@ namespace DripOut.API.Controllers
     [Authorize]
     public class ReviewController : ControllerBase
     {
-        private readonly IBaseRepository<Review> _repo;
-        private readonly IProductRepository _productService;
-        private readonly SignInManager<AppUser> _signInManager;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ReviewController(IBaseRepository<Review> repo 
-                                , SignInManager<AppUser> signInManager
-                                 , IProductRepository productService  )
+        public ReviewController(IUnitOfWork unitOfWork)
         {
-            _repo = repo;
-            _signInManager = signInManager;
-            _productService = productService;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpPost()]
-        public async Task<IActionResult> CreateReview(ReviewDTO inputReview)
+        public async Task<IActionResult> CreateReview(ReviewInputDTO inputReview)
         {
-            var user = await _signInManager.UserManager.FindByIdAsync(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!);
-            if(user == null)
-                return BadRequest("User not found");
             if (ModelState.IsValid)
             {
-                var product = await _productService.FindAsync(inputReview.ProductId)!;
+                var product = await _unitOfWork.Products.FindAsync(inputReview.ProductId)!;
                 if(product == null)
                     return BadRequest("Product not found");
                 var review = new Review
                 {
                     ReviewText = inputReview.ReviewText,
                     Stars = inputReview.Stars,
-                    CreatedOn = inputReview.CreatedOn,
+                    CreatedOn = DateTime.UtcNow,
                     ProductId = inputReview.ProductId,
                     Product = product,
-                    AppUserId = user.Id,
-                    User = user
+                    AppUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!,
                 };
-                await _repo.AddAsync(review);
+                await _unitOfWork.Reviews.AddAsync(review);
                 return Created();
             }
             return BadRequest(ModelState);

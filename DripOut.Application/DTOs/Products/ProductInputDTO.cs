@@ -9,20 +9,19 @@ using System.Threading.Tasks;
 
 namespace DripOut.Application.DTOs.Products
 {
-    public class ProductsDTO
+    public class ProductInputDTO
     {
-        public int Id { get; set; }
-
+        [Required, MaxLength(100, ErrorMessage = "Title is too big")]
         public string Title { get; set; } = null!;
 
+        [MaxLength(500)]
+        public string? Description { get; set; }
+
+        [Required, Precision(18, 2)]
+        [Range(0, 10000)]
         public decimal Price { get; set; }
 
-        public double Discount { get; set; } = 0;
-
-        public float Rate { get; set; } = 0;
-
-        public virtual ICollection<ProductImage>? Images { get; set; }
-
+        public int CategoryId { get; set; }
 
     }
 }

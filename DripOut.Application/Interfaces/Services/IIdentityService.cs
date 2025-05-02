@@ -13,5 +13,5 @@ namespace DripOut.Application.Interfaces.Services
 		Task<IdentityDto> CreateUserAsync(RegisterDto model, string role);
 		Task<IdentityDto> ValidateUserCredentialsAsync(LoginDto model);
 		Task<IdentityDto> FindUserByEmailAsync(string email);
-	}
+    }
 }

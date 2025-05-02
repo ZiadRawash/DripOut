@@ -25,7 +25,7 @@ namespace DripOut.Domain.Models
         [Range(0,10000)]
         public decimal Price { get; set; }
 
-        [MinLength(0)]
+        [Range(0,100)]
         public int Amount { get; set; }
 
         [MinLength(0)]
@@ -35,7 +35,7 @@ namespace DripOut.Domain.Models
         public float Rate { get; set; } = 0;
 
         public virtual ICollection<ProductVariant>? Variants { get; set; }
-        public virtual ICollection<ProductImage>? Images { get; set; }
+        public virtual ICollection<Image>? Images { get; set; }
 
         public int CategoryId { get; set; }
         public Category? Category { get; set; }

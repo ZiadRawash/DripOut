@@ -12,6 +12,6 @@ namespace DripOut.Application.DTOs
         public int Id { get; set; }
         public string Name { get; set; } = null!;
 
-        public EntityPage<ProductsDTO> ProductsPage { get; set; } = null!;
+        public EntityPage<ProductDTO> ProductsPage { get; set; } = null!;
     }
 }

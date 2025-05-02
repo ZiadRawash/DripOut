@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DripOut.Application.DTOs.Account;
 
-namespace DripOut.Application.DTOs
+namespace DripOut.Application.DTOs.Reviews
 {
     public class ReviewDTO
     {
@@ -17,7 +17,6 @@ namespace DripOut.Application.DTOs
         [Range(0,5)]
         public double Stars { get; set; } = 1;
         public DateTime CreatedOn { get; set; }
-        public int ProductId { get; set; }
         public UserDTO User { get; set; } = default!;
 
     }

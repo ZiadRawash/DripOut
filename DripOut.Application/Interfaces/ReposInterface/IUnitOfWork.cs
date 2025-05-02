@@ -1,4 +1,5 @@
-﻿using DripOut.Domain.Models;
+﻿using DripOut.Application.Interfaces.Services;
+using DripOut.Domain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,8 @@ namespace DripOut.Application.Interfaces.ReposInterface
     {
         IProductRepository Products { get; }
         IBaseRepository<Category> Categories { get; }
+        IBaseRepository<ProductVariant> Variants { get; }
+        IBaseRepository<Review> Reviews { get; }
 
         Task<int> SaveChangesAsync();
 

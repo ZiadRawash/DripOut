@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace DripOut.Domain.Models
 
 {
-    public class ProductImage
+    public class Image
     {
         public int Id { get; set; }
         public string ImageUrl { get; set; } = null!;

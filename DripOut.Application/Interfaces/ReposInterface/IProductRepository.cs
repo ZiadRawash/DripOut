@@ -1,4 +1,6 @@
 ﻿using DripOut.Application.DTOs;
+using DripOut.Application.DTOs.Products;
+using DripOut.Application.Helpers;
 using DripOut.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -11,7 +13,7 @@ namespace DripOut.Application.Interfaces.ReposInterface
 {
     public interface IProductRepository : IBaseRepository<Product>
     {
-        public Task<EntityPage<Product>> GetAllAsync(string search, int categoryID , int crntPage , int pageSize);
+        public Task<EntityPage<Product>> GetAllAsync(QueryModel queryModel);
 
     }
 }

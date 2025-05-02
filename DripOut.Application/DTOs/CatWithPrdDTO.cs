@@ -1,4 +1,4 @@
-﻿using DripOut.Domain.Models;
+﻿using DripOut.Application.DTOs.Products;
 using System;
 using System.Collections.Generic;
 using System.Linq;

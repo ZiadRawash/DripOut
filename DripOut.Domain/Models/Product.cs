@@ -15,15 +15,20 @@ namespace DripOut.Domain.Models
     {
         public int Id { get; set; }
 
-        [Required, MaxLength(100)]
+        [Required, MaxLength(100,ErrorMessage ="Title is too big")]
         public string Title { get; set; } = null!;
 
         [MaxLength(500)]
         public string? Description { get; set; }
 
         [Required , Precision(18,2)]
+        [Range(0,10000)]
         public decimal Price { get; set; }
 
+        [MinLength(0)]
+        public int Amount { get; set; }
+
+        [MinLength(0)]
         public double Discount { get; set; } = 0;
 
         [Range(0,5)]

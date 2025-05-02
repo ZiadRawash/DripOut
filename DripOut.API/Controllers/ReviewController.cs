@@ -53,9 +53,8 @@ namespace DripOut.API.Controllers
                 await _repo.AddAsync(review);
                 return Created();
             }
-            return BadRequest("Model Is Invalid");
+            return BadRequest(ModelState);
         }
-
 
     }
 }

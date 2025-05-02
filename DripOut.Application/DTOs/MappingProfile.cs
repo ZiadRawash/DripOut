@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using DripOut.Application.DTOs;
 using DripOut.Application.DTOs.Account;
+using DripOut.Application.DTOs.Products;
 using DripOut.Domain.Models;
 
 

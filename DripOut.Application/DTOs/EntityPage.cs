@@ -8,7 +8,7 @@ namespace DripOut.Application.DTOs
 {
     public class EntityPage<T> where T : class
     {
-        public IEnumerable<T>? List;
+        public IEnumerable<T>? Items;
         public int CurrentPage;
         public int PageSize;
         public int TotalSize;

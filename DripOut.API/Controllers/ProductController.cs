@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using DripOut.Application.DTOs;
+using DripOut.Application.DTOs.Products;
 using DripOut.Application.Interfaces.ReposInterface;
 using DripOut.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -20,7 +20,7 @@ namespace DripOut.API.Controllers
         private readonly IProductRepository _prdService;
         private readonly IMapper _mapper;
 
-        public ProductController(IProductRepository prdService, SignInManager<AppUser> signInManager
+        public ProductController(IProductRepository prdService
             , IMapper mapper)
         {
             _prdService = prdService;

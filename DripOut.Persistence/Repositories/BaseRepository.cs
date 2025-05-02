@@ -10,22 +10,28 @@ namespace DripOut.Persistence.Repositories
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
-        public ApplicationDbContext dbContext { get; private set; }
-        public DbSet<T> dbSet { get; private set; }
+        protected ApplicationDbContext dbContext { get; private set; }
+        protected DbSet<T> dbSet { get; private set; }
         public BaseRepository(ApplicationDbContext dbcontext)
         {
             this.dbContext = dbcontext;
             this.dbSet = dbContext.Set<T>();
         }
 
-        public async Task<T> AddAsync(T entity)
+        public async Task<T?> AddAsync(T entity)
         {
             await dbSet.AddAsync(entity);
             await dbContext.SaveChangesAsync();
             return entity;
         }
+        public async Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities)
+        {
+            await dbSet.AddRangeAsync(entities);
+            await dbContext.SaveChangesAsync();
+            return entities;
+        }
 
-        public async Task<T> DeleteAsync(T entity)
+        public async Task<T?> DeleteAsync(T entity)
         {
             dbSet.Remove(entity);
             await dbContext.SaveChangesAsync();
@@ -34,10 +40,7 @@ namespace DripOut.Persistence.Repositories
 
         public async Task<IEnumerable<T>> GetAllAsync() => await dbSet.ToListAsync();
 
-        public async Task<T>? FindAsync(int id) => await dbSet.FindAsync(id);
-
-
-        public async Task<T>? UpdateAsync(T entity)
+        public async Task<T?> UpdateAsync(T entity)
         {
             if (entity != null)
             {
@@ -50,28 +53,23 @@ namespace DripOut.Persistence.Repositories
             }
             return entity;
         }
+        public async Task<T?> FindAsync(int id) => await dbSet.FindAsync(id)??null!;
 
-        public async Task<T>? FindAsync(Expression<Func<T, bool>> expression
+        public async Task<T?> FindAsync(Expression<Func<T, bool>> expression
             ,params Expression<Func<T, object>>[] includes)
         {
             var query = dbSet.Where(expression);
-            if (query != null)
+            if (query != null && includes != null)
             {
-                if (includes != null)
-                {
                     foreach (var include in includes)
                     {
                         query = query.Include(include);
                     }
-
-                    return await query.FirstAsync();
-                }
-				return await query.FirstAsync();
             }
-            return (null!);
+            return await query!.FirstAsync();
 		}
 
-        public async Task<IEnumerable<T>>? GetAllAsync(Expression<Func<T, bool>> expression,
+        public async Task<IEnumerable<T>?> GetAllAsync(Expression<Func<T, bool>> expression,
            params Expression<Func<T, object>>[] includes)
         {
             var query = dbSet.Where(expression);
@@ -84,5 +82,6 @@ namespace DripOut.Persistence.Repositories
 
         public  IQueryable<T> GetAll(Expression<Func<T, bool>> expression)
             =>  dbSet.Where(expression);
+
     }
 }

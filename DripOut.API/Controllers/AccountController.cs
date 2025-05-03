@@ -52,7 +52,7 @@ namespace DripOut.API.Controllers
 			{
 				return Ok(new
 				{
-					refreshToken= loggedin.Data.RefreshToken,
+					refreshToken= loggedin.Data!.RefreshToken,
 					token=loggedin.Data.Token,
 
 				});

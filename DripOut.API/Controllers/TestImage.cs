@@ -22,8 +22,19 @@ namespace DripOut.API.Controllers
 				return BadRequest("No file uploaded.");
 			}
 
-			var imageUrl = await _cloudinaryService.UploadImage(createdimageDto);
+			SavedImageDto imageUrl = await _cloudinaryService.UploadImage(createdimageDto);
 			return Ok(imageUrl);
+		}
+		[HttpPost("DeleteImage")]
+		public async Task<IActionResult> DeletePhoto(string id)
+		{
+			if (id == null)
+			{
+				return BadRequest("No file uploaded.");
+			}
+
+			SavedImageDto Deleted = await _cloudinaryService.DeleteImage(id);
+			return Ok(Deleted);
 		}
 	}
 }

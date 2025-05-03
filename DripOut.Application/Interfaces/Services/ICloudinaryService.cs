@@ -9,6 +9,10 @@ namespace DripOut.Application.Interfaces.Services
 {
 	public interface ICloudinaryService
 	{
-		Task<String> UploadImage(CreateImageDto model);
+		Task<SavedImageDto> UploadImage(CreateImageDto model);
+		
+		Task<SavedImageDto> DeleteImage(string publicID);
+
 	}
 }
+	

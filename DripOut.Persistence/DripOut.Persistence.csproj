@@ -24,4 +24,8 @@
     <ProjectReference Include="..\DripOut.Domain\DripOut.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
 </Project>

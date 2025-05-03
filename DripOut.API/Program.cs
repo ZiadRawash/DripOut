@@ -15,7 +15,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddTransient<IIdentityService, IdentityService>();
 builder.Services.AddTransient<IJWTService, JWTService>();
+builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+//Mapping JWTSettings To class
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JWTSettings"));
+//Mapping CloudinarySettings To class
+builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
+
 builder.Services.AddScoped<AuthenticationService>();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

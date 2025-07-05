@@ -363,3 +363,6 @@ MigrationBackup/
 FodyWeavers.xsd
 DripOut.API/appsettings.json
 DripOut.API/appsettings.Development.json
+# Ignore BFG-related folders
+DripOut.git/
+DripOut.git.bfg-report/

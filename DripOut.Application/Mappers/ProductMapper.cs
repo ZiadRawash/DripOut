@@ -53,5 +53,30 @@ namespace DripOut.Application.Mappers
                 ProductId = variantInput.ProductId
             };
         }
+        public static VariantDTO MapToVariantDTO(this ProductVariant variant)
+        {
+            return new VariantDTO
+            {
+                Id = variant.Id,
+                Size = variant.Size,
+                StockQuantity = variant.StockQuantity,
+            };
+        }
+        public static ProductDetailsDTO MapToProductDetailsDTO(this Product product)
+        {
+            return new ProductDetailsDTO
+            {
+                Id = product.Id,
+                Title = product.Title,
+                Description = product.Description,
+                Price = product.Price,
+                Amount = product.Amount,
+                Discount = product.Discount,
+                Rate = product.Rate,
+                Variants = product.Variants!.Select(v=>v.MapToVariantDTO()),
+                Images = product.Images,
+                CategoryId = product.CategoryId
+            };
+        }
     }
 }

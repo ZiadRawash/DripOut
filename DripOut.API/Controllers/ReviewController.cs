@@ -40,6 +40,8 @@ namespace DripOut.API.Controllers
                     AppUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!,
                 };
                 await _unitOfWork.Reviews.AddAsync(review);
+                product.Rate = (float)(product.Reviews!.Sum(r => r.Stars) / product.Reviews!.Count);
+                await _unitOfWork.Products.UpdateAsync(product);
                 return Created();
             }
             return BadRequest(ModelState);

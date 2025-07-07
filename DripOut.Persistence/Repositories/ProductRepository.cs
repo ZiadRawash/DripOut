@@ -37,7 +37,7 @@ namespace DripOut.Persistence.Repositories
                 .Where(p => p.Price >= queryModel.MinPrice && p.Price <= queryModel.MaxPrice);
 			//Sorting
 			if (queryModel.OrderBy.IsNullOrEmpty())
-				query = query.OrderByDescending(p => p.Id);
+				query = query.OrderBy(p => p.Rate);
 			else if(queryModel.OrderBy == "ASC")
                 query = query.OrderBy(p => p.Price);
 			else

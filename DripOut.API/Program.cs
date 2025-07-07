@@ -23,8 +23,8 @@ builder.Services.AddTransient<IJWTService, JWTService>();
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JWTSettings"));
 builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-//builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>) );
-//builder.Services.AddScoped<IProductRepository,ProductRepository>();
+builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>) );
+builder.Services.AddScoped<IProductRepository,ProductRepository>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 		options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);

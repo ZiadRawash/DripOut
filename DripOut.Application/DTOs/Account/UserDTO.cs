@@ -11,6 +11,7 @@ namespace DripOut.Application.DTOs.Account
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Email { get; set; }
-
+        public string? ImageUrl { get; set; } = null!;
+        public string? PublicID { get; set; } = null!;
     }
 }

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Interfaces\ReposInterface\" />
-    <Folder Include="Mappers\" />
   </ItemGroup>
 
   <ItemGroup>

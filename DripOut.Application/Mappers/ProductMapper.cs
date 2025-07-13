@@ -17,10 +17,11 @@ namespace DripOut.Application.Mappers
             {
                 Id = product.Id,
                 Title = product.Title,
+                Description = product.Description,
                 Price = product.Price,
                 Discount = product.Discount,
                 Rate = product.Rate,
-                Images = product.Images
+                Images = product.Images is null ? [] : product.Images.Select(i => i.ImageUrl).ToList()
             };
         }
         public static EntityPage<ProductDTO> MapToProductDTO(this EntityPage<Product> productsPage)
@@ -41,8 +42,19 @@ namespace DripOut.Application.Mappers
                 Title = productInput.Title,
                 Description = productInput.Description,
                 Price = productInput.Price,
+                Discount = productInput.Discount,
                 CategoryId = productInput.CategoryId,
             };
+        }
+
+        //This function takes a new product to modify the old one , avoiding creating new product object
+        public static void UpdateProduct(this Product oldProduct,ProductInputDTO newProduct)
+        {
+            oldProduct.Title = newProduct.Title;
+            oldProduct.Description = newProduct.Description;
+            oldProduct.Price = newProduct.Price;
+            oldProduct.Discount = newProduct.Discount;
+            oldProduct.CategoryId = newProduct.CategoryId;
         }
         public static ProductVariant MapToProductVariant(this VariantInputDTO variantInput)
         {

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+
 namespace DripOut.Application.DTOs.Products
 {
     public class ProductDTO
@@ -15,14 +16,14 @@ namespace DripOut.Application.DTOs.Products
 
         public string Title { get; set; } = null!;
 
+        public string? Description { get; set; }
+        
         public decimal Price { get; set; }
 
-        public double Discount { get; set; } = 0;
+        public double Discount { get; set; } = 0.0;
 
         public float Rate { get; set; } = 0;
 
-		public virtual ICollection<DripOut.Domain.Models.Image>? Images { get; set; }
-
-
+        public virtual List<string>? Images { get; set; }
     }
 }

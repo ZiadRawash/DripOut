@@ -1,6 +1,6 @@
 ﻿using DripOut.Application.DTOs.Reviews;
 using DripOut.Application.Interfaces.ReposInterface;
-
+using DripOut.Application.Mappers;
 using DripOut.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -43,6 +43,16 @@ namespace DripOut.API.Controllers
                 return Created();
             }
             return BadRequest(ModelState);
+        }
+
+        [HttpGet("Reviews/{productId:int}")]
+        public async Task<IActionResult> GetReviewsAsync(int productId)
+        {
+            var reviews = await _unitOfWork.Reviews.GetAllAsync(r => r.ProductId == productId, r => r.User!, r => r.User!.Image!);
+            if (reviews == null)
+                return NotFound("No Reviews Found");
+            return Ok(reviews.Select(r => r.MapToDTO()));
+
         }
 
     }

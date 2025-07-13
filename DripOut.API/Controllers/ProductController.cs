@@ -47,17 +47,8 @@ namespace DripOut.API.Controllers
             if (product == null)
                 return NotFound("No Such Id");
             return Ok(product);
-
         }
-        [HttpGet("Reviews/{productId:int}")]
-        public async Task<IActionResult> GetReviewsAsync(int productId)
-        {
-            var reviews = await _unitOfWork.Reviews.GetAllAsync(r => r.ProductId == productId,r =>r.User!);
-            if (reviews == null)
-                return NotFound("No Reviews Found");
-            return Ok(reviews.Select(r => r.MapToDTO()));
-            
-        }
+        
 
         [HttpPost]
         public async Task<IActionResult> AddAsync(ProductInputDTO productDTO)
@@ -66,7 +57,7 @@ namespace DripOut.API.Controllers
                 return BadRequest();
             var product = productDTO.MapToProduct();
             await _unitOfWork.Products.AddAsync(product);
-            return CreatedAtAction(nameof(FindAsync), new { id = product.Id }, product);
+            return Created();
         }
 
         [HttpPost("Size")]
@@ -84,24 +75,27 @@ namespace DripOut.API.Controllers
             return Created();
         }
 
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> Put(int id, Product product)
-        //{
-        //    if (id != product.Id)
-        //        return BadRequest();
-        //    var updatedProduct = await _repo.UpdateAsync(product)!;
-        //    if (updatedProduct == null)
-        //        return NotFound();
-        //    return NoContent();
-        //}
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    var product = await _repo.FindAsync(id)!;
-        //    if (product == null)
-        //        return NotFound();
-        //    await _repo.DeleteAsync(product);
-        //    return NoContent();
-        //}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put(int id, ProductInputDTO inputProduct)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest();
+            var product = await _unitOfWork.Products.FindAsync(id);
+            if (product is null)
+                return NotFound();
+            product.UpdateProduct(inputProduct);
+            await _unitOfWork.Products.UpdateAsync(product)!;
+            return Created();
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var product = await _unitOfWork.Products.FindAsync(id)!;
+            if (product == null)
+                return NotFound();
+            await _unitOfWork.Products.DeleteAsync(product);
+            return NoContent();
+        }
     }
 }

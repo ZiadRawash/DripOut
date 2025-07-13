@@ -22,7 +22,8 @@ namespace DripOut.Application.Mappers
                 {
                     FirstName = review.User!.FirstName,
                     LastName = review.User.LastName,
-                    Email = review.User.Email
+                    Email = review.User.Email,
+                    ImageUrl = review.User.Image is null ? String.Empty : review.User.Image.ImageUrl
                 }
             };
         }

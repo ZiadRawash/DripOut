@@ -21,6 +21,8 @@ namespace DripOut.Application.DTOs.Products
         [Range(0, 10000)]
         public decimal Price { get; set; }
 
+        public double Discount { get; set; } = 0;
+
         public int CategoryId { get; set; }
 
     }

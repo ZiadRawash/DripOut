@@ -44,7 +44,11 @@ namespace DripOut.Persistence
 				.WithOne(r => r.User)
 				.HasForeignKey(r => r.AppUserId)
 				.OnDelete(DeleteBehavior.Cascade);
-
+			builder.Entity<AppUser>()
+			.HasOne(u => u.Image)
+			.WithOne(i => i.AppUser)
+			.HasForeignKey<Image>(i => i.AppUserId)
+			.OnDelete(DeleteBehavior.Cascade);
 		}
 
     }

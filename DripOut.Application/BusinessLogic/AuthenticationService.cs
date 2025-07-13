@@ -152,6 +152,41 @@ namespace DripOut.Application.BusinessLogic
 
 			return Result<AuthReturnDto>.Success(result, "Logged In Successfully");
 		}
+		public async Task<Result<AuthReturnDto>> ResendVerificationCodeAsync(string email)
+		{
+			if (string.IsNullOrWhiteSpace(email))
+				return Result<AuthReturnDto>.Failure("Email cannot be null or empty");
+
+			var resendResult = await _identityService.ResendEmailVerificationCodeAsync(email);
+			if (!resendResult.IsSucceeded)
+				return Result<AuthReturnDto>.Failure("Failed to resend verification code", resendResult.Errors);
+
+			var user = await _identityService.FindUserByEmailAsync(email);
+			if (!user.IsSucceeded)
+				return Result<AuthReturnDto>.Failure("User not found", user.Errors);
+
+			// Extract first name from email if needed (similar to your existing logic)
+			var firstName = email.Split('@')[0];
+
+			var emailSent = await _mailService.SendConfirmationAsync(
+				email,
+				"Email Verification Code Resent",
+				firstName,
+				email,
+				resendResult.ConfirmationCode!
+			);
+
+			if (!emailSent)
+				return Result<AuthReturnDto>.Failure("Failed to send verification email");
+
+			var result = new AuthReturnDto
+			{
+				Email = email,
+				ConfigCode = resendResult.ConfirmationCode
+			};
+
+			return Result<AuthReturnDto>.Success(result, "Verification code resent successfully. Please check your inbox.");
+		}
 
 	}
 }

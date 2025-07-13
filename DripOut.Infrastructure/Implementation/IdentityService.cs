@@ -212,6 +212,37 @@ namespace DripOut.Infrastructure.Implementation
 				};
 			}
 		}
+		public async Task<IdentityDto> ResendEmailVerificationCodeAsync(string email)
+		{
+			try
+			{
+				if (string.IsNullOrWhiteSpace(email))
+					return new IdentityDto { IsSucceeded = false, Errors = { "Email cannot be null or empty" } };
 
-    }
+				var user = await _userManager.FindByEmailAsync(email);
+				if (user == null)
+					return new IdentityDto { IsSucceeded = false, Errors = { "User not found" } };
+
+				if (user.EmailConfirmed)
+					return new IdentityDto { IsSucceeded = false, Errors = { "Email is already confirmed" } };
+
+				var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+				return new IdentityDto
+				{
+					IsSucceeded = true,
+					Email = user.Email,
+					ConfirmationCode = code
+				};
+			}
+			catch (Exception ex)
+			{
+				return new IdentityDto
+				{
+					IsSucceeded = false,
+					Errors = { ex.Message }
+				};
+			}
+		}
+
+	}
 }

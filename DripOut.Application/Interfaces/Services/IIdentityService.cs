@@ -16,6 +16,7 @@ namespace DripOut.Application.Interfaces.Services
 		Task<IdentityDto> verifyConfirmationCode(string email, string code);
 		Task<IdentityDto> FindUserByEmailAsync(string email);
 		Task<GooglePayloadDto> ValidateGoogleSignin(string id);
+		Task<IdentityDto> ResendEmailVerificationCodeAsync(string email);
 
 	}
 }

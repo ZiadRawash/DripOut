@@ -12,7 +12,7 @@ namespace DripOut.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ReviewController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

@@ -29,7 +29,7 @@ namespace DripOut.Domain.Models
         public int Amount { get; set; }
 
         [MinLength(0)]
-        public double Discount { get; set; } = 0;
+        public double Discount { get; set; } = 0.0;
 
         [Range(0,5)]
         public float Rate { get; set; } = 0;

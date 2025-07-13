@@ -83,7 +83,7 @@ namespace DripOut.API.Controllers
             var product = await _unitOfWork.Products.FindAsync(id);
             if (product is null)
                 return NotFound();
-            product = inputProduct.MapToProduct();
+            product.UpdateProduct(inputProduct);
             await _unitOfWork.Products.UpdateAsync(product)!;
             return Created();
         }

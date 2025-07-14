@@ -13,5 +13,8 @@ namespace DripOut.Application.DTOs
         public int PageSize;
         public int Count;
         public int TotalPages;
+        public decimal MinPrice;
+        public decimal MaxPrice;
+        public IList<string> Sizes = new List<string>();
     }
 }

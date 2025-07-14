@@ -41,5 +41,8 @@ namespace DripOut.Domain.Models
         public Category? Category { get; set; }
 
         public ICollection<Review>? Reviews { get; set; }
+
+        public IList<Favourite> Favourites { get; set; } = new List<Favourite>();
+
     }
 }

@@ -14,6 +14,7 @@ namespace DripOut.Application.Interfaces.ReposInterface
         IBaseRepository<Category> Categories { get; }
         IBaseRepository<ProductVariant> Variants { get; }
         IBaseRepository<Review> Reviews { get; }
+        IBaseRepository<Favourite> Favourites { get; }
 
         Task<int> SaveChangesAsync();
 

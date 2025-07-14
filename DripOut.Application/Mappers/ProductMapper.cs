@@ -32,7 +32,10 @@ namespace DripOut.Application.Mappers
                 CurrentPage = productsPage.CurrentPage,
                 PageSize = productsPage.PageSize,
                 Count = productsPage.Count,
-                TotalPages = productsPage.TotalPages
+                TotalPages = productsPage.TotalPages,
+                MinPrice = productsPage.MinPrice,
+                MaxPrice = productsPage.MaxPrice,
+                Sizes = productsPage.Sizes
             };
         }
         public static Product MapToProduct(this ProductInputDTO productInput)

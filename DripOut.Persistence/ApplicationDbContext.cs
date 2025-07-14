@@ -17,12 +17,23 @@ namespace DripOut.Persistence
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<ProductVariant> ProductVariants { get; set; }
 		public DbSet<Review> Reviews { get; set; }
-		
+		public DbSet<Favourite> Favourites { get; set; }
 
-		protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);
-			List<IdentityRole> roles = new List<IdentityRole>
+
+			builder.Entity<Favourite>().HasKey(f => new { f.AppUserId, f.ProductId });
+			builder.Entity<Favourite>()
+				.HasOne(f => f.AppUser)
+				.WithMany(u => u.Favourites)
+				.HasForeignKey(f => f.AppUserId);
+            builder.Entity<Favourite>()
+                .HasOne(f => f.Product)
+                .WithMany(u => u.Favourites)
+                .HasForeignKey(f => f.ProductId);
+
+            List<IdentityRole> roles = new List<IdentityRole>
 			{
 				new IdentityRole
 				{

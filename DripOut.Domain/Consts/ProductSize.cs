@@ -8,10 +8,7 @@ namespace DripOut.Domain.Consts
 {
     public static class ProductSize
     {
-        public const string XS = "XS";
-        public const string S = "S";
-        public const string M = "M";
-        public const string L = "L";
-        public const string XL = "XL";
+        public static readonly IList<string> AllSizes = ["XS", "S", "M", "L", "XL",
+                                                        "36", "37", "38","39", "40", "41", "42", "43", "44", "45"];
     }
 }

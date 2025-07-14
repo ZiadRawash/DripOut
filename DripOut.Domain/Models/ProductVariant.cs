@@ -16,8 +16,8 @@ namespace DripOut.Domain.Models
     {
         public int Id { get; set; }
 
-        [Required, MaxLength(5,ErrorMessage ="No such size")]
-        public string Size { get; set; } = ProductSize.M;
+        [Required]
+        public string Size { get; set; } = ProductSize.AllSizes[2];
 
         [Required , Range(0,20)]
         public int StockQuantity { get; set; }

@@ -19,7 +19,7 @@ namespace DripOut.API.Controllers
 	{
 		private readonly AuthenticationService _authService;
 
-		public AccountController(AuthenticationService authService )
+		public AccountController(AuthenticationService authService)
 		{
 			_authService = authService;
 		}
@@ -53,11 +53,12 @@ namespace DripOut.API.Controllers
 			}
 
 			var confirmed = await _authService.VerifyUser(model.email, model.code);
-			if (confirmed.IsSucceeded) {
+			if (confirmed.IsSucceeded)
+			{
 				return Ok(new
 				{
 					success = true,
-					message = confirmed.Message,					
+					message = confirmed.Message,
 					Token = confirmed.Data!.Token,
 					RefreshToken = confirmed.Data!.RefreshToken
 				}
@@ -67,13 +68,13 @@ namespace DripOut.API.Controllers
 			else
 			{
 				return Unauthorized(new
-					{
+				{
 					success = false,
 					message = confirmed.Message,
-					errors = confirmed.Errors 
-					}
+					errors = confirmed.Errors
+				}
 				);
-				
+
 			}
 		}
 
@@ -87,12 +88,12 @@ namespace DripOut.API.Controllers
 			{
 				return Ok(new
 				{
-					refreshToken= loggedin.Data!.RefreshToken,
-					token=loggedin.Data.Token,
+					refreshToken = loggedin.Data!.RefreshToken,
+					token = loggedin.Data.Token,
 
 				});
 			}
-			return BadRequest( new{ message = loggedin.Message + string.Join(",", loggedin.Errors)});
+			return BadRequest(new { message = loggedin.Message + string.Join(",", loggedin.Errors) });
 
 		}
 		[HttpPost]
@@ -102,23 +103,20 @@ namespace DripOut.API.Controllers
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 			var result = await _authService.AccessRefreshToken(model.refreshToken);
-				if (!result.IsSucceeded)
+			if (!result.IsSucceeded)
+			{
+				return BadRequest(
+				new
 				{
-					return BadRequest(
-					new
-					{
-						message = result.Errors
-					});
-				}
-				return Ok(new
-				{
-					token = result.Data!.Token
+					message = result.Errors
 				});
 			}
-			return BadRequest(new { error = "RefreshToken Can't be NULL" });
-		}
-			
-		
+			return Ok(new
+			{
+				token = result.Data!.Token
+			});
+
+
 		}
 
 		[HttpPost]
@@ -128,12 +126,12 @@ namespace DripOut.API.Controllers
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-				var result = await _authService.LogOutAsync(model.refreshToken);
-				if (!result.IsSucceeded)
-					return BadRequest(new { message = "failure" });
-				return Ok(new { message = "success" });
+			var result = await _authService.LogOutAsync(model.refreshToken);
+			if (!result.IsSucceeded)
+				return BadRequest(new { message = "failure" });
+			return Ok(new { message = "success" });
 
-		}	
+		}
 		[HttpPost("Google-signin")]
 		public async Task<IActionResult> Google_signin([FromBody] GoogleSignupTokenDto model)
 		{
@@ -151,7 +149,7 @@ namespace DripOut.API.Controllers
 					token = result.Data!.Token,
 					refreshToken = result.Data.RefreshToken
 				}
-				
+
 				);
 		}
 		[HttpPost("resend-verification")]
@@ -194,4 +192,3 @@ namespace DripOut.API.Controllers
 		}
 	}
 }
-

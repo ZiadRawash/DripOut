@@ -361,5 +361,5 @@ MigrationBackup/
 
 appsettings.Development.json
 appsettings.json
-
+appsettings.Development.json
 .vscode

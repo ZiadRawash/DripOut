@@ -96,12 +96,12 @@ namespace DripOut.API.Controllers
 
 		}
 		[HttpPost]
-		[Route("GenrateAccessToken")]
-		public async Task<IActionResult> GenrateAccessToken([FromBody] string RefreshToken)
+		[Route("GenerateAccessToken")]
+		public async Task<IActionResult> GenerateAccessToken(RefreshTokenDto model)
 		{
-			if (RefreshToken != null)
-			{
-				var result = await _authService.AccessRefreshToken(RefreshToken);
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+			var result = await _authService.AccessRefreshToken(model.refreshToken);
 				if (!result.IsSucceeded)
 				{
 					return BadRequest(
@@ -114,25 +114,21 @@ namespace DripOut.API.Controllers
 				{
 					token = result.Data!.Token
 				});
-			}
-			return BadRequest(new { error = "RefreshToken Can't be NULL" });
+			
+		
 		}
 
 		[HttpPost]
 		[Route("LogOut")]
-		public async Task<IActionResult> LogOut([FromBody] string RefreshToken)
+		public async Task<IActionResult> LogOut(RefreshTokenDto model)
 		{
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
 
-			if (RefreshToken == null)
-				return BadRequest(new { error = "RefreshToken Can not be Null" });
-			else
-			{
-				var result = await _authService.LogOutAsync(RefreshToken!);
+				var result = await _authService.LogOutAsync(model.refreshToken);
 				if (!result.IsSucceeded)
 					return BadRequest(new { message = "failure" });
 				return Ok(new { message = "success" });
-
-			}
 
 		}	
 		[HttpPost("Google-signin")]

@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using DripOut.Domain.Models;
+using ImageUploadResult = DripOut.Application.DTOs.Image.ImageUploadResult;
 
 namespace DripOut.Infrastructure.Implementation
 {
@@ -73,17 +74,181 @@ namespace DripOut.Infrastructure.Implementation
 					{
 						var Url = uploadResult.SecureUrl.ToString();
 						var PublicId = uploadResult.PublicId;
-						return new SavedImageDto { ImageUrl = Url, ProductId = PublicId, IsSucceeded = true, Message = uploadResult.StatusCode.ToString() + "____" + StatusCodes.Status200OK.ToString() };
+						return new SavedImageDto { IsSucceeded = true,  ImageUrl = Url, deleteID = PublicId, Message = uploadResult.StatusCode.ToString() + "____" + StatusCodes.Status200OK.ToString() };
 					}
 					return new SavedImageDto {  IsSucceeded = false, Message = uploadResult.StatusCode.ToString() + "____" + StatusCodes.Status200OK.ToString() };
-
-
 				}
 			}
-			return new SavedImageDto {  IsSucceeded = false, Message = "U Should Upload Image" };
-
-
+			return new SavedImageDto {  IsSucceeded = false, Message = "Un appropriate Image format" };
 		}
-	
+
+		//public async Task<SavedMultipleImagesDto> UploadMultipleFiles(CreateMultipleImagesDto model)
+		//{
+		//	var response = new SavedMultipleImagesDto();
+		//	if (model == null || !model.FormFiles.Any())
+		//	{
+		//		response.Message = "No files uploaded";
+		//		response.IsSucceeded = false;
+		//		return response;
+		//	}
+		//	var uploadTasks = model.FormFiles.Select(async file =>
+		//	{
+		//		if (file == null)
+		//		{
+		//			return new ImageUploadResult
+		//			{
+		//				IsSucceeded = false,
+		//			};
+		//		}
+
+		//		try
+		//		{
+		//			using (var stream = new MemoryStream())
+		//			{
+		//				await file.CopyToAsync(stream);
+		//				stream.Position = 0;
+
+		//				var uploadParams = new ImageUploadParams
+		//				{
+		//					File = new FileDescription(Guid.NewGuid().ToString(), stream),
+		//					Transformation = new Transformation()
+		//						.FetchFormat("auto"),
+		//					Folder = "products"
+		//				};
+
+		//				var uploadResult = _cloudinary.Upload(uploadParams);
+
+		//				if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
+		//				{
+		//					return new ImageUploadResult
+		//					{
+		//						IsSucceeded = true,
+		//						ImageUrl = uploadResult.SecureUrl.ToString(),
+		//						DeleteId = uploadResult.PublicId,
+		//					};
+		//				}
+
+		//				return new ImageUploadResult
+		//				{
+		//					IsSucceeded = false,
+		//					ImageUrl = null,
+		//					DeleteId = null,
+		//				};
+		//			}
+		//		}
+		//		catch 
+		//		{
+		//			return new ImageUploadResult
+		//			{
+
+		//				IsSucceeded = false,
+		//			};
+		//		}
+		//	});
+
+		//	var results = await Task.WhenAll(uploadTasks);
+
+		//	response.UploadResults = results.ToList();
+
+		//	response.IsSucceeded = response.SuccessfulUploads > 0;
+
+		//	return response;
+		//}		
+		public async Task<SavedMultipleImagesDto> UploadMultipleFiles(CreateMultipleImagesDto model)
+		{
+			var response = new SavedMultipleImagesDto();
+
+			if (model == null || model.FormFiles == null || !model.FormFiles.Any())
+			{
+				response.Message = "No files uploaded";
+				response.IsSucceeded = false;
+				response.SuccessfulUploads = 0;
+				response.FailedUploads = 0;
+				return response;
+			}
+
+			var uploadTasks = model.FormFiles.Select(async file =>
+			{
+				if (file == null || file.Length == 0)
+				{
+					return new ImageUploadResult
+					{
+						IsSucceeded = false,
+						ImageUrl = null,
+						DeleteId = null,
+					};
+				}
+
+				try
+				{
+					using (var stream = new MemoryStream())
+					{
+						await file.CopyToAsync(stream);
+						stream.Position = 0;
+
+						var uploadParams = new ImageUploadParams
+						{
+							File = new FileDescription(Guid.NewGuid().ToString(), stream),
+							Transformation = new Transformation()
+								.FetchFormat("auto"),
+							Folder = "products"
+						};
+
+						var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+						if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
+						{
+							return new ImageUploadResult
+							{
+								IsSucceeded = true,
+								ImageUrl = uploadResult.SecureUrl.ToString(),
+								DeleteId = uploadResult.PublicId,
+							};
+						}
+
+						return new ImageUploadResult
+						{
+							IsSucceeded = false,
+							ImageUrl = null,
+							DeleteId = null,
+						};
+					}
+				}
+				catch (Exception ex)
+				{
+
+					return new ImageUploadResult
+					{
+						IsSucceeded = false,
+						ImageUrl = null,
+						DeleteId = null,
+					};
+				}
+			});
+
+			var results = await Task.WhenAll(uploadTasks);
+
+			response.UploadResults = results.ToList();
+			response.SuccessfulUploads = results.Count(r => r.IsSucceeded);
+			response.FailedUploads = results.Count(r => !r.IsSucceeded);
+			response.IsSucceeded = response.SuccessfulUploads > 0;
+
+
+			if (response.SuccessfulUploads == results.Length)
+			{
+				response.Message = "All files uploaded successfully";
+			}
+			else if (response.SuccessfulUploads > 0)
+			{
+				response.Message = $"{response.SuccessfulUploads} files uploaded successfully, {response.FailedUploads} failed";
+			}
+			else
+			{
+				response.Message = "All file uploads failed";
+			}
+
+			return response;
+		}
+
 	}
 }

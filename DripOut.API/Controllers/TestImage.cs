@@ -36,5 +36,52 @@ namespace DripOut.API.Controllers
 			SavedImageDto Deleted = await _cloudinaryService.DeleteImage(id);
 			return Ok(Deleted);
 		}
+		[HttpPost("upload-multiple")]
+		public async Task<IActionResult> UploadMultipleImages([FromForm] CreateMultipleImagesDto model)
+		{
+			try
+			{
+				var result = await _cloudinaryService.UploadMultipleFiles(model);
+
+				if (result.IsSucceeded)
+				{
+					// Get successful uploads info
+					var successfulUploads = result.UploadResults
+						.Where(r => r.IsSucceeded)
+						.Select(r => new
+						{
+							imageUrl = r.ImageUrl,
+							deleteId = r.DeleteId
+						})
+						.ToList();
+
+					return Ok(new
+					{
+						success = true,
+						message = result.Message,
+						totalUploaded = result.SuccessfulUploads,
+						totalFailed = result.FailedUploads,
+						images = successfulUploads
+					});
+				}
+
+				return BadRequest(new
+				{
+					success = false,
+					message = result.Message,
+					totalUploaded = result.SuccessfulUploads,
+					totalFailed = result.FailedUploads
+				});
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, new
+				{
+					success = false,
+					message = "An error occurred while uploading images",
+					error = ex.Message
+				});
+			}
+		}
 	}
 }

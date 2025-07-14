@@ -15,16 +15,21 @@ namespace DripOut.Domain.Models
     {
         public int Id { get; set; }
 
-        [Required, MaxLength(100)]
+        [Required, MaxLength(100,ErrorMessage ="Title is too big")]
         public string Title { get; set; } = null!;
 
         [MaxLength(500)]
         public string? Description { get; set; }
 
         [Required , Precision(18,2)]
+        [Range(0,10000)]
         public decimal Price { get; set; }
 
-        public double Discount { get; set; } = 0;
+        [Range(0,100)]
+        public int Amount { get; set; }
+
+        [MinLength(0)]
+        public double Discount { get; set; } = 0.0;
 
         [Range(0,5)]
         public float Rate { get; set; } = 0;
@@ -36,5 +41,8 @@ namespace DripOut.Domain.Models
         public Category? Category { get; set; }
 
         public ICollection<Review>? Reviews { get; set; }
+
+        public IList<Favourite> Favourites { get; set; } = new List<Favourite>();
+
     }
 }

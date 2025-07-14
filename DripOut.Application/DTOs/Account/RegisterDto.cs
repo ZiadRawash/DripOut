@@ -10,7 +10,7 @@ namespace DripOut.Application.DTOs.Account
 	public class RegisterDto
 	{
 		public required string FirstName { get; set; }
-		public required string LastName { get; set; }
+		public  string LastName { get; set; }=string.Empty;
 
 		[Required(ErrorMessage = "Email is required.")]
 		[EmailAddress(ErrorMessage = "Invalid email format.")]

@@ -10,7 +10,7 @@ namespace DripOut.Application.DTOs.Image
 	public class SavedImageDto: ServiceResponse
 	{
 		public string? ImageUrl { get; set; } = null!;
-		public string? ProductId { get; set; } = null!;
+		public string? deleteID { get; set; } = null!;
 
 	}
 }

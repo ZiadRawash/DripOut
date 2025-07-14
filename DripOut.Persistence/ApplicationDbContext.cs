@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Reflection.Emit;
 namespace DripOut.Persistence
 {
 	public class ApplicationDbContext : IdentityDbContext<AppUser>
@@ -16,12 +17,24 @@ namespace DripOut.Persistence
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<ProductVariant> ProductVariants { get; set; }
 		public DbSet<Review> Reviews { get; set; }
-		
+		public DbSet<Favourite> Favourites { get; set; }
 
-		protected override void OnModelCreating(ModelBuilder builder)
+
+        protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);
-			List<IdentityRole> roles = new List<IdentityRole>
+
+			builder.Entity<Favourite>().HasKey(f => new { f.AppUserId, f.ProductId });
+			builder.Entity<Favourite>()
+				.HasOne(f => f.AppUser)
+				.WithMany(u => u.Favourites)
+				.HasForeignKey(f => f.AppUserId);
+            builder.Entity<Favourite>()
+                .HasOne(f => f.Product)
+                .WithMany(u => u.Favourites)
+                .HasForeignKey(f => f.ProductId);
+
+            List<IdentityRole> roles = new List<IdentityRole>
 			{
 				new IdentityRole
 				{
@@ -38,8 +51,18 @@ namespace DripOut.Persistence
 			};
 			builder.Entity<IdentityRole>().HasData(roles);
 
+			builder.Entity<AppUser>()
+				.HasMany(u => u.Reviews)
+				.WithOne(r => r.User)
+				.HasForeignKey(r => r.AppUserId)
+				.OnDelete(DeleteBehavior.Cascade);
+			builder.Entity<AppUser>()
+			.HasOne(u => u.Image)
+			.WithOne(i => i.AppUser)
+			.HasForeignKey<Image>(i => i.AppUserId)
+			.OnDelete(DeleteBehavior.Cascade);
 		}
 
 
-	}
+    }
 }

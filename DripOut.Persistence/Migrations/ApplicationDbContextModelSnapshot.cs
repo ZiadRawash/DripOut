@@ -113,6 +113,21 @@ namespace DripOut.Persistence.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("DripOut.Domain.Models.Favourite", b =>
+                {
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AppUserId", "ProductId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Favourites");
+                });
+
             modelBuilder.Entity("DripOut.Domain.Models.Image", b =>
                 {
                     b.Property<int>("Id")
@@ -121,14 +136,24 @@ namespace DripOut.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ProductId")
+                    b.Property<int?>("ProductId")
                         .HasColumnType("int");
 
+                    b.Property<string>("PublicID")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("AppUserId")
+                        .IsUnique()
+                        .HasFilter("[AppUserId] IS NOT NULL");
 
                     b.HasIndex("ProductId");
 
@@ -142,6 +167,9 @@ namespace DripOut.Persistence.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("int");
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
@@ -185,8 +213,7 @@ namespace DripOut.Persistence.Migrations
 
                     b.Property<string>("Size")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StockQuantity")
                         .HasColumnType("int");
@@ -412,13 +439,37 @@ namespace DripOut.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DripOut.Domain.Models.Image", b =>
+            modelBuilder.Entity("DripOut.Domain.Models.Favourite", b =>
                 {
+                    b.HasOne("DripOut.Domain.Models.AppUser", "AppUser")
+                        .WithMany("Favourites")
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DripOut.Domain.Models.Product", "Product")
-                        .WithMany("Images")
+                        .WithMany("Favourites")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("AppUser");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("DripOut.Domain.Models.Image", b =>
+                {
+                    b.HasOne("DripOut.Domain.Models.AppUser", "AppUser")
+                        .WithOne("Image")
+                        .HasForeignKey("DripOut.Domain.Models.Image", "AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("DripOut.Domain.Models.Product", "Product")
+                        .WithMany("Images")
+                        .HasForeignKey("ProductId");
+
+                    b.Navigation("AppUser");
 
                     b.Navigation("Product");
                 });
@@ -459,7 +510,7 @@ namespace DripOut.Persistence.Migrations
             modelBuilder.Entity("DripOut.Domain.Models.Review", b =>
                 {
                     b.HasOne("DripOut.Domain.Models.AppUser", "User")
-                        .WithMany()
+                        .WithMany("Reviews")
                         .HasForeignKey("AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -528,7 +579,13 @@ namespace DripOut.Persistence.Migrations
 
             modelBuilder.Entity("DripOut.Domain.Models.AppUser", b =>
                 {
+                    b.Navigation("Favourites");
+
+                    b.Navigation("Image");
+
                     b.Navigation("RefreshToken");
+
+                    b.Navigation("Reviews");
                 });
 
             modelBuilder.Entity("DripOut.Domain.Models.Category", b =>
@@ -538,6 +595,8 @@ namespace DripOut.Persistence.Migrations
 
             modelBuilder.Entity("DripOut.Domain.Models.Product", b =>
                 {
+                    b.Navigation("Favourites");
+
                     b.Navigation("Images");
 
                     b.Navigation("Reviews");

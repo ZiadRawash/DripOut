@@ -8,6 +8,7 @@ namespace DripOut.Application.DTOs.Account
 {
 	public class AuthReturnDto
 	{
+		public string? ConfigCode { get; set; }
 		public string? Email { get; set; }
 		public string? Password { get; set; }
 		public string? Role { get; set; }

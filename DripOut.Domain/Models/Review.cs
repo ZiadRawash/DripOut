@@ -14,7 +14,7 @@ namespace DripOut.Domain.Models
         [Required, MaxLength(1000)]
         public string ReviewText { get; set; } = null!;
 
-
+        [Range(1,5)]
         public double Stars { get; set; } = 1;
 
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
@@ -22,9 +22,7 @@ namespace DripOut.Domain.Models
         public int ProductId { get; set; }
         public Product? Product { get; set; }
 
-
-        public required string AppUserId { get; set; }
-
+        public string AppUserId { get; set; } = string.Empty;
         public AppUser? User { get; set; }
     }
 }

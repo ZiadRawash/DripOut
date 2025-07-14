@@ -8,10 +8,18 @@ using System.Threading.Tasks;
 
 namespace DripOut.Domain.Models
 {
-	public class AppUser: IdentityUser
+	public class AppUser : IdentityUser
 	{
 		public required string FirstName { get; set; }
-		public required string LastName { get; set; }
-		public List<RefreshToken>RefreshToken {  get; set; }= new List<RefreshToken>();
-	}
+		public string LastName { get; set; } = string.Empty;
+		public List<RefreshToken> RefreshToken { get; set; } = new List<RefreshToken>();
+
+		public ICollection<Review>? Reviews { get; set; }
+
+		public virtual Image? Image { get; set; }
+
+		public IList<Favourite> Favourites { get; set; } = new List<Favourite>();
+    }
+
 }
+

@@ -8,9 +8,7 @@ using Microsoft.AspNetCore.Http;
 namespace DripOut.Application.DTOs.Image
 {
 	public class CreateImageDto
-	{
-		
-
+	{	
 		[Required(ErrorMessage = "File is required.")]
 		
 		public required IFormFile FormFile { get; set; }

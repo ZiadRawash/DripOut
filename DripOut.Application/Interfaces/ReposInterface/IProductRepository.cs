@@ -14,6 +14,6 @@ namespace DripOut.Application.Interfaces.ReposInterface
     public interface IProductRepository : IBaseRepository<Product>
     {
         public Task<EntityPage<Product>> GetAllAsync(QueryModel queryModel);
-
+        public Task<Product> UpdateRateAsync(int productId);
     }
 }

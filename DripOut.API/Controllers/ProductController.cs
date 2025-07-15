@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using DripOut.Application.DTOs;
+﻿using DripOut.Application.DTOs;
 using DripOut.Application.DTOs.Products;
 using DripOut.Application.Helpers;
 using DripOut.Application.Interfaces.ReposInterface;
@@ -46,7 +45,7 @@ namespace DripOut.API.Controllers
                 p => p.Reviews!);
             if (product == null)
                 return NotFound("No Such Id");
-            return Ok(product);
+            return Ok(product.MapToDetailedProdDTO());
         }
         
 
@@ -61,7 +60,7 @@ namespace DripOut.API.Controllers
         }
 
         [HttpPost("Size")]
-        public async Task<IActionResult> AddSizeAsync(VariantInputDTO variantDTO)
+        public async Task<IActionResult> AddSizeAsync(VariantDTO variantDTO)
         {
             var variant = variantDTO.MapToProductVariant();
             var product = await _unitOfWork.Products.FindAsync(p => p.Id == variant.ProductId);

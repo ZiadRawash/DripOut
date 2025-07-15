@@ -28,7 +28,10 @@ namespace DripOut.Persistence.Repositories
 		public async Task<EntityPage<Product>> GetAllAsync(QueryModel queryModel)
 		{
 
-			var query = _context.Products.Include(p => p.Variants).Include(p => p.Images).AsQueryable();
+			var query = _context.Products
+				.Include(p => p.Variants)
+				.Include(p => p.Reviews)
+				.Include(p => p.Images).AsQueryable();
 
             //Filtering
             query = query.WhereIf(queryModel.CategoryID != 0, p => p.CategoryId == queryModel.CategoryID)
@@ -75,6 +78,16 @@ namespace DripOut.Persistence.Repositories
 			return entityPage;
 		}
 
+        public async Task<Product> UpdateRateAsync(int productId)
+        {
+            var product = await FindAsync(p => p.Id == productId,
+                p => p.Reviews!);
+            if (product!.Reviews is null || !product.Reviews.Any())
+                return null!;
 
-	}
+            product.Rate = (float)product.Reviews.Average(r => r.Stars);
+            await UpdateAsync(product);
+            return product;
+        }
+    }
 }

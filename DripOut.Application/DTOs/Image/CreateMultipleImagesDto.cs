@@ -14,5 +14,7 @@ namespace DripOut.Application.DTOs.Image
 		[MinLength(1, ErrorMessage = "At least one file must be provided.")]
 		[MaxLength(3, ErrorMessage = "At most three file must be provided.")]
 		public required IList<IFormFile> FormFiles { get; set; }
-	}
+		[Required]
+		public int ProductId { get; set; }
+    }
 }

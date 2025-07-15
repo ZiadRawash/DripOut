@@ -10,7 +10,7 @@ using DripOut.Application.Validators.ProductVariant;
 
 namespace DripOut.Application.DTOs.Products
 {
-    public class VariantInputDTO
+    public class VariantDTO
     {
         [Required,ValidSizeAtribute]
         public string Size { get; set; } = ProductSize.AllSizes[2];

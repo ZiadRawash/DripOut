@@ -21,7 +21,26 @@ namespace DripOut.Application.Mappers
                 Price = product.Price,
                 Discount = product.Discount,
                 Rate = product.Rate,
-                Images = product.Images is null ? [] : product.Images.Select(i => i.ImageUrl).ToList()
+                Reviews = product.Reviews?.Count ?? 0,
+                Image =  product.Images?.Select(i => i.ImageUrl).FirstOrDefault(),
+                CategoryId = product.CategoryId
+            };
+        }
+        public static ProductDetailsDTO MapToDetailedProdDTO(this Product product)
+        {
+            return new ProductDetailsDTO
+            {
+                Id = product.Id,
+                Title = product.Title,
+                Description = product.Description,
+                Amount = product.Amount,
+                Price = product.Price,
+                Discount = product.Discount,
+                Rate = product.Rate,
+                Reviews = product.Reviews?.Count ?? 0,
+                Variants = product.Variants is null ? [] : product.Variants.Select(v=>v.MapToVariantDTO()),
+                Images = product.Images?.Select(i => i.ImageUrl).ToList(),
+                CategoryId = product.CategoryId
             };
         }
         public static EntityPage<ProductDTO> MapToProductDTO(this EntityPage<Product> productsPage)
@@ -59,13 +78,22 @@ namespace DripOut.Application.Mappers
             oldProduct.Discount = newProduct.Discount;
             oldProduct.CategoryId = newProduct.CategoryId;
         }
-        public static ProductVariant MapToProductVariant(this VariantInputDTO variantInput)
+        public static ProductVariant MapToProductVariant(this VariantDTO variantInput)
         {
             return new ProductVariant
             {
                 Size = variantInput.Size,
                 StockQuantity = variantInput.StockQuantity,
                 ProductId = variantInput.ProductId
+            };
+        }
+        public static VariantDTO MapToVariantDTO(this ProductVariant productVariant)
+        {
+            return new VariantDTO
+            {
+                ProductId = productVariant.ProductId,
+                StockQuantity = productVariant.StockQuantity,
+                Size = productVariant.Size
             };
         }
     }

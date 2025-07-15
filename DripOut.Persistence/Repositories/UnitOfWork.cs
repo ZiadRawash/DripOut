@@ -19,6 +19,8 @@ namespace DripOut.Persistence.Repositories
         public IBaseRepository<Review> Reviews { get; private set; }
         public IBaseRepository<Favourite> Favourites { get; private set; }
 
+        public IBaseRepository<Image> Images { get; private set; }
+
         public UnitOfWork(ApplicationDbContext context)
         {
             _context = context;
@@ -27,6 +29,7 @@ namespace DripOut.Persistence.Repositories
             Variants = new BaseRepository<ProductVariant>(_context);
             Reviews = new BaseRepository<Review>(_context);
             Favourites = new BaseRepository<Favourite>(_context);
+            Images = new BaseRepository<Image>(_context);
         }
 
 

@@ -13,7 +13,7 @@ namespace DripOut.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+     [Authorize]
     public class CategoryController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -83,18 +83,6 @@ namespace DripOut.API.Controllers
                 return NotFound();
             await _unitOfWork.Products.DeleteAsync(category);
             return NoContent();
-        }
-        [HttpGet("{id}/sizes")]
-        public async Task<IActionResult> GetAvailableSizes(int id)
-        {
-            
-            var products = await _unitOfWork.Products.GetAllAsync(p => p.CategoryId == id , p => p.Variants!);
-            if(products == null || !products.Any())
-                return NotFound("No Products Found in this Category");
-            var variants = products.SelectMany(p => p.Variants!).ToList();
-            var sizes = variants.Select(v => v.Size).Distinct().ToList();
-
-            return Ok(sizes);
         }
     }
 }

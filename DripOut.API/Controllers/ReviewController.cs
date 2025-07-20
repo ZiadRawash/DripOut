@@ -1,5 +1,6 @@
 ﻿using DripOut.Application.DTOs.Reviews;
 using DripOut.Application.Interfaces.ReposInterface;
+using DripOut.Application.Interfaces.Services;
 using DripOut.Application.Mappers;
 using DripOut.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -16,10 +17,11 @@ namespace DripOut.API.Controllers
     public class ReviewController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        public ReviewController(IUnitOfWork unitOfWork)
+        private readonly IProductService _prdService;
+        public ReviewController(IUnitOfWork unitOfWork , IProductService _prdService)
         {
             _unitOfWork = unitOfWork;
+            this._prdService = _prdService;
         }
 
         [HttpPost()]
@@ -40,7 +42,7 @@ namespace DripOut.API.Controllers
                     AppUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!,
                 };
                 await _unitOfWork.Reviews.AddAsync(review);
-                await _unitOfWork.Products.UpdateRateAsync(inputReview.ProductId);
+                await _prdService.UpdateRateAsync(inputReview.ProductId);
                 return Created();
             }
             return BadRequest(ModelState);

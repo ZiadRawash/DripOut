@@ -1,4 +1,5 @@
 ﻿using DripOut.Domain.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,9 @@ namespace DripOut.Application.DTOs.Products
         public decimal Price { get; set; }
 
         public double Discount { get; set; } = 0;
-
+        [Required]
+        public IList<IFormFile>? Images { get; set; }
+        [Required]
         public int CategoryId { get; set; }
 
     }

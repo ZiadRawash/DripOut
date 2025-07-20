@@ -19,6 +19,6 @@ namespace DripOut.Application.Interfaces.ReposInterface
 
         public Task<IEnumerable<T>?> GetAllAsync(Expression<Func<T, bool>> expression,
           params Expression<Func<T, object>>[] includes);
-        public IQueryable<T>? GetAll(Expression<Func<T, bool>> expression);
+        public IQueryable<T> GetAll(params Expression<Func<T, object>>[] includes);
     }
 }

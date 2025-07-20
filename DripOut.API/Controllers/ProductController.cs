@@ -2,6 +2,7 @@
 using DripOut.Application.DTOs.Products;
 using DripOut.Application.Helpers;
 using DripOut.Application.Interfaces.ReposInterface;
+using DripOut.Application.Interfaces.Services;
 using DripOut.Application.Mappers;
 using DripOut.Domain.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -19,16 +20,17 @@ namespace DripOut.API.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        public ProductController(IUnitOfWork unitOfWork)
+        private readonly IProductService _prdService;
+        public ProductController(IUnitOfWork unitOfWork , IProductService prdService)
         {
             _unitOfWork = unitOfWork;
+            _prdService = prdService;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery] QueryModel queryModel)
         {
-            var productsPage = await _unitOfWork.Products.GetAllAsync(queryModel);
+            var productsPage = await _prdService.GetAllAsync(queryModel);
             var productsDTO = productsPage.MapToProductDTO();
             if (productsPage.Items == null)
                 return NotFound("No Products Found");
@@ -52,11 +54,12 @@ namespace DripOut.API.Controllers
         [HttpPost]
         public async Task<IActionResult> AddAsync(ProductInputDTO productDTO)
         {
-            if (productDTO == null)
-                return BadRequest();
-            var product = productDTO.MapToProduct();
-            await _unitOfWork.Products.AddAsync(product);
-            return Created();
+            if (ModelState.IsValid)
+            {
+                var product = await _prdService.CreateProductAsync(productDTO);
+                return Ok(product);
+            }
+            return BadRequest(ModelState);
         }
 
         [HttpPost("Size")]

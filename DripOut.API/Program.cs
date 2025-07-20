@@ -43,7 +43,8 @@ builder.Configuration
 
 builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-//builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>) );
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>) );
 //builder.Services.AddScoped<IProductRepository,ProductRepository>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>

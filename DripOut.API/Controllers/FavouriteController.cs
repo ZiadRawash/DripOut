@@ -46,6 +46,11 @@ namespace DripOut.API.Controllers
             var product = await _unitOfWork.Products.FindAsync(productId);
             if(product is null)
                 return BadRequest("Product not found");
+            var favourites = await _unitOfWork.Favourites.GetAllAsync(f => f.AppUserId == userId && f.ProductId == productId);
+            if (favourites is not null && favourites.Any())
+            {
+                return BadRequest("Product already in favourites");
+            }
             var favourite = new Favourite
             {
                 AppUserId = userId,

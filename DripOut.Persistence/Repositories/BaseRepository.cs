@@ -4,7 +4,9 @@ using DripOut.Application.Interfaces;
 using DripOut.Application.Interfaces.ReposInterface;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using System.Linq.Expressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace DripOut.Persistence.Repositories
 {
@@ -79,9 +81,14 @@ namespace DripOut.Persistence.Repositories
             }
             return await query.ToListAsync();
         }
-
-        public  IQueryable<T> GetAll(Expression<Func<T, bool>> expression)
-            =>  dbSet.Where(expression);
-
+        public IQueryable<T> GetAll(params Expression<Func<T, object>>[] includes)
+        {
+            var query = dbSet.AsQueryable();
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+            return query;
+        }
     }
 }

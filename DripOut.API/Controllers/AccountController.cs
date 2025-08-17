@@ -10,6 +10,7 @@ using AuthenticationService = DripOut.Application.BusinessLogic.AuthenticationSe
 using DripOut.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using DripOut.Application.Common;
+using IAuthenticationService = DripOut.Application.Interfaces.Services.IAuthenticationService;
 
 namespace DripOut.API.Controllers
 {
@@ -17,9 +18,9 @@ namespace DripOut.API.Controllers
 	[ApiController]
 	public class AccountController : ControllerBase
 	{
-		private readonly AuthenticationService _authService;
+		private readonly IAuthenticationService _authService;
 
-		public AccountController(AuthenticationService authService )
+		public AccountController(IAuthenticationService authService )
 		{
 			_authService = authService;
 		}

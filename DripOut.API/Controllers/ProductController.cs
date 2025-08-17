@@ -10,94 +10,90 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace DripOut.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [Authorize]
+	[Route("api/[controller]")]
+	[ApiController]
+	//[Authorize]
+	public class ProductController : ControllerBase
+	{
+		private readonly IProductService _prdService;
 
-    public class ProductController : ControllerBase
-    {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IProductService _prdService;
-        public ProductController(IUnitOfWork unitOfWork , IProductService prdService)
-        {
-            _unitOfWork = unitOfWork;
-            _prdService = prdService;
-        }
+		public ProductController(IProductService prdService)
+		{
+			_prdService = prdService;
+		}
 
-        [HttpGet]
-        public async Task<IActionResult> Index([FromQuery] QueryModel queryModel)
-        {
-            var productsPage = await _prdService.GetAllAsync(queryModel);
-            var productsDTO = productsPage.MapToProductDTO();
-            if (productsPage.Items == null)
-                return NotFound("No Products Found");
-            return Ok(productsDTO);
-        }
-            
+		[HttpGet]
+		public async Task<IActionResult> Index([FromQuery] QueryModel queryModel)
+		{
+			var productsPage = await _prdService.GetAllAsync(queryModel);
+			var productsDTO = productsPage.MapToProductDTO();
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> FindAsync(int id)
-        {
-            var product = await _unitOfWork.Products.FindAsync(p=>p.Id == id,
-                p => p.Variants!,
-                p => p.Images!,
-                p => p.Reviews!);
-            if (product == null)
-                return NotFound("No Such Id");
-            return Ok(product.MapToDetailedProdDTO());
-        }
-        
+			if (productsPage.Items == null)
+				return NotFound("No Products Found");
 
-        [HttpPost]
-        public async Task<IActionResult> AddAsync(ProductInputDTO productDTO)
-        {
-            if (ModelState.IsValid)
-            {
-                var product = await _prdService.CreateProductAsync(productDTO);
-                return Ok(product);
-            }
-            return BadRequest(ModelState);
-        }
+			return Created();
+		}
 
-        [HttpPost("Size")]
-        public async Task<IActionResult> AddSizeAsync(VariantDTO variantDTO)
-        {
-            var variant = variantDTO.MapToProductVariant();
-            var product = await _unitOfWork.Products.FindAsync(p => p.Id == variant.ProductId);
-            if (product == null)
-                return NotFound("No Such Id");
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-            product.Amount += variant.StockQuantity;
-            await _unitOfWork.Products.UpdateAsync(product);
-            await _unitOfWork.Variants.AddAsync(variant);
-            return Created();
-        }
+		[HttpGet("{id}")]
+		public async Task<IActionResult> FindAsync(int id)
+		{
+			var product = await _prdService.GetByIdAsync(id);
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, ProductInputDTO inputProduct)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest();
-            var product = await _unitOfWork.Products.FindAsync(id);
-            if (product is null)
-                return NotFound();
-            product.UpdateProduct(inputProduct);
-            await _unitOfWork.Products.UpdateAsync(product)!;
-            return Created();
-        }
+			if (product == null)
+				return NotFound("No Such Id");
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var product = await _unitOfWork.Products.FindAsync(id)!;
-            if (product == null)
-                return NotFound();
-            await _unitOfWork.Products.DeleteAsync(product);
-            return NoContent();
-        }
-    }
+			return Ok(product.MapToDetailedProdDTO());
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> AddAsync(ProductInputDTO productDTO)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			var product = await _prdService.CreateProductAsync(productDTO);
+			return Ok(product);
+		}
+
+		[HttpPost("Size")]
+		public async Task<IActionResult> AddVarient(VariantDTO variantDTO)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+
+			var result = await _prdService.AddVarientAsync(variantDTO);
+
+			if (!result)
+				return NotFound("No Such Id");
+
+			return Created();
+		}
+
+		[HttpPut("{id}")]
+		public async Task<IActionResult> Put(int id, ProductInputDTO inputProduct)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest();
+
+			var result = await _prdService.UpdateProductAsync(id, inputProduct);
+
+			if (!result)
+				return NotFound();
+
+			return Created();
+		}
+
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> Delete(int id)
+		{
+			var result = await _prdService.DeleteProductAsync(id);
+
+			if (!result)
+				return NotFound();
+
+			return NoContent();
+		}
+	}
 }

@@ -14,7 +14,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DripOut.Application.BusinessLogic
 {
-	public class AuthenticationService
+	public class AuthenticationService: IAuthenticationService
 	{
 		private readonly IIdentityService _identityService;
 		private readonly IJWTService _iJWTService;

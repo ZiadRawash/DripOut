@@ -24,6 +24,7 @@ namespace DripOut.Domain.Models
         [Required]
         public int ProductId { get; set; }
         public virtual Product? Product { get; set; }
-    }
+		public ICollection<CartItem> CartItems { get; set; }= new List<CartItem>();
+	}
 }
     

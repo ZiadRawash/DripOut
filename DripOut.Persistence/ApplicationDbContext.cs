@@ -34,7 +34,7 @@ namespace DripOut.Persistence
 				.HasOne(rv => rv.Review)
 				.WithMany(r => r.ReviewVotes)
 				.HasForeignKey(rv => rv.ReviewId)
-				.OnDelete(DeleteBehavior.Restrict); // هنا بدل Cascade
+				.OnDelete(DeleteBehavior.Restrict); 
 
 
 			builder.Entity<Favourite>().HasKey(f => new { f.AppUserId, f.ProductId });

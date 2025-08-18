@@ -16,7 +16,7 @@ namespace DripOut.Application.Interfaces.Services
 		public Task<Product?> GetByIdAsync(int id);
 		public Task<Product> UpdateRateAsync(int productId);
 		public Task<Product> CreateProductAsync(ProductInputDTO prdInputDTO);
-		public Task<bool> AddVarientAsync(VariantDTO variantDTO);
+		public Task<bool> AddVariantsAsync(VariantDTO variantDTO);
 		public Task<bool> UpdateProductAsync(int id, ProductInputDTO inputProduct);
 		public Task<bool> DeleteProductAsync(int id);
 	}

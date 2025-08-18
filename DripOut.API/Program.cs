@@ -15,6 +15,7 @@ using DripOut.Application.Interfaces;
 using DripOut.Application.Interfaces.ReposInterface;
 using DripOut.Application.Interfaces.Services;
 using Microsoft.OpenApi.Models;
+using DripOut.Application.ApplicationServices;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
@@ -26,6 +27,7 @@ builder.Services.AddTransient<IIdentityService, IdentityService>();
 builder.Services.AddTransient<IJWTService, JWTService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IMailService, MailService>();
+builder.Services.AddScoped<ICartService, CartService>();
 
 //Mapping JWTSettings To class
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JWTSettings"));

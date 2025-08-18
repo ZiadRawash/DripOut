@@ -123,7 +123,7 @@ namespace DripOut.Application.AuthenticationService
 			return product;
 		}
 
-		public async Task<bool> AddVarientAsync(VariantDTO variantDTO)
+		public async Task<bool> AddVariantsAsync(VariantDTO variantDTO)
 		{
 			var variant = variantDTO.MapToProductVariant();
 			var product = await _unitOfWork.Products.FindAsync(p => p.Id == variant.ProductId);
@@ -157,5 +157,6 @@ namespace DripOut.Application.AuthenticationService
 			await _unitOfWork.Products.DeleteAsync(product);
 			return true;
 		}
+
 	}
 }

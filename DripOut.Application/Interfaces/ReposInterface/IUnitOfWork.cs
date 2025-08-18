@@ -1,4 +1,4 @@
-﻿using DripOut.Application.Interfaces.Services;
+﻿ using DripOut.Application.Interfaces.Services;
 using DripOut.Domain.Models;
 using System;
 using System.Collections.Generic;
@@ -17,6 +17,8 @@ namespace DripOut.Application.Interfaces.ReposInterface
         IBaseRepository<Favourite> Favourites { get; }
         IBaseRepository<Image> Images { get; }
         IBaseRepository<ReviewVote> ReviewVotes{get; }
+        IBaseRepository<Cart> Carts{get; }
+        IBaseRepository<CartItem> CartItems { get; }
         Task<int> SaveChangesAsync();
 
     }

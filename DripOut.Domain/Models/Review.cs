@@ -14,9 +14,8 @@ namespace DripOut.Domain.Models
         [Required, MaxLength(1000)]
         public string ReviewText { get; set; } = null!;
 
-        [Range(1,5)]
-        //how the default is 1????????????
-        public double Stars { get; set; } = 1;
+        [Range(0,5)]
+        public double Stars { get; set; } 
         public int Ups { get; set; } = 0;
         public int Downs { get; set; } = 0;
         

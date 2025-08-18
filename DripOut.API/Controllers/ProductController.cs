@@ -63,7 +63,7 @@ namespace DripOut.API.Controllers
 			if (!ModelState.IsValid)
 				return BadRequest(ModelState);
 
-			var result = await _prdService.AddVarientAsync(variantDTO);
+			var result = await _prdService.AddVariantsAsync(variantDTO);
 
 			if (!result)
 				return NotFound("No Such Id");
@@ -95,5 +95,7 @@ namespace DripOut.API.Controllers
 
 			return NoContent();
 		}
+
+
 	}
 }

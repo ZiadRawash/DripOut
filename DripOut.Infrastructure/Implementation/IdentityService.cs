@@ -1,4 +1,4 @@
-﻿using DripOut.Application.BusinessLogic;
+﻿using DripOut.Application.AuthenticationService;
 using DripOut.Application.Common.Settings;
 using DripOut.Application.DTOs.Account;
 using DripOut.Application.Interfaces;
@@ -135,7 +135,7 @@ namespace DripOut.Infrastructure.Implementation
 				};
 			}
 		}
-		public async Task<IdentityDto> verifyConfirmationCode(string email, string code) {
+		public async Task<IdentityDto> VerifyConfirmationCode(string email, string code) {
 		var found=await _userManager.FindByEmailAsync(email);
 			if (found == null) return new IdentityDto { IsSucceeded = false };
 			var confirmed = await _userManager.ConfirmEmailAsync(found, code);

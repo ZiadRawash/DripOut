@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DripOut.Application.BusinessLogic
+namespace DripOut.Application.AuthenticationService
 {
 	public class ProductService : IProductService
 	{

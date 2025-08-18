@@ -15,7 +15,12 @@ namespace DripOut.Domain.Models
         public string ReviewText { get; set; } = null!;
 
         [Range(1,5)]
+        //how the default is 1????????????
         public double Stars { get; set; } = 1;
+        public int Ups { get; set; } = 0;
+        public int Downs { get; set; } = 0;
+        
+        public int totalReacts => Ups-Downs;
 
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
 
@@ -24,5 +29,6 @@ namespace DripOut.Domain.Models
 
         public string AppUserId { get; set; } = string.Empty;
         public AppUser? User { get; set; }
-    }
+		public ICollection<ReviewVote> ReviewVotes { get; set; } = new List<ReviewVote>();
+	}
 }

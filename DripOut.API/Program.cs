@@ -1,5 +1,5 @@
 using DripOut.Application.Common.Settings;
-using DripOut.Application.BusinessLogic;
+using DripOut.Application.AuthenticationService;
 using DripOut.Domain.Models;
 using DripOut.Application.DTOs;
 using DripOut.Infrastructure.Implementation;
@@ -44,6 +44,7 @@ builder.Configuration
 builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>) );
 //builder.Services.AddScoped<IProductRepository,ProductRepository>();
 

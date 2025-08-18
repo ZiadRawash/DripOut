@@ -39,7 +39,7 @@ namespace DripOut.Application.Interfaces.Services
 		/// <param name="email">The email of the user to confirm.</param>
 		/// <param name="code">The confirmation code provided to the user.</param>
 		/// <returns>An <see cref="IdentityDto"/> containing the result of the verification.</returns>
-		Task<IdentityDto> verifyConfirmationCode(string email, string code);
+		Task<IdentityDto> VerifyConfirmationCode(string email, string code);
 
 		/// <summary>
 		/// Finds a user by their email address.

@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace DripOut.Application.BusinessLogic
+namespace DripOut.Application.AuthenticationService
 {
 	public class AuthenticationService: IAuthenticationService
 	{
@@ -29,7 +29,7 @@ namespace DripOut.Application.BusinessLogic
 
 		}
 		public async Task<Result<AuthReturnDto>> VerifyUser(string email,string code) {
-		var verified=await _identityService.verifyConfirmationCode(email, code);
+		var verified=await _identityService.VerifyConfirmationCode(email, code);
 		if(!verified.IsSucceeded) 
 				return Result<AuthReturnDto>.Failure("Error Happend ",verified.Errors);
 		var jwtResult = await _iJWTService.GenerateJWTTokenAsync(email!);

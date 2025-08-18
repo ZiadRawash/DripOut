@@ -18,10 +18,24 @@ namespace DripOut.Persistence
 		public DbSet<ProductVariant> ProductVariants { get; set; }
 		public DbSet<Review> Reviews { get; set; }
 		public DbSet<Favourite> Favourites { get; set; }
+		public DbSet<ReviewVote> ReviewVotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
 		{
 			base.OnModelCreating(builder);
+
+			builder.Entity<ReviewVote>()
+				.HasOne(rv => rv.User)
+				.WithMany(u => u.ReviewVotes)
+				.HasForeignKey(rv => rv.AppUserId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			builder.Entity<ReviewVote>()
+				.HasOne(rv => rv.Review)
+				.WithMany(r => r.ReviewVotes)
+				.HasForeignKey(rv => rv.ReviewId)
+				.OnDelete(DeleteBehavior.Restrict); // هنا بدل Cascade
+
 
 			builder.Entity<Favourite>().HasKey(f => new { f.AppUserId, f.ProductId });
 			builder.Entity<Favourite>()

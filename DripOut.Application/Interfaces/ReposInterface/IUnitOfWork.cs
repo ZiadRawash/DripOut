@@ -16,7 +16,7 @@ namespace DripOut.Application.Interfaces.ReposInterface
         IBaseRepository<Review> Reviews { get; }
         IBaseRepository<Favourite> Favourites { get; }
         IBaseRepository<Image> Images { get; }
-
+        IBaseRepository<ReviewVote> ReviewVotes{get; }
         Task<int> SaveChangesAsync();
 
     }

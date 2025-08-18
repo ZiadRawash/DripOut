@@ -18,6 +18,7 @@ namespace DripOut.Persistence.Repositories
         public IBaseRepository<Review> Reviews { get; private set; }
         public IBaseRepository<Favourite> Favourites { get; private set; }
         public IBaseRepository<Image> Images { get; private set; }
+        public IBaseRepository<ReviewVote> ReviewVotes { get; private set; }
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -28,7 +29,10 @@ namespace DripOut.Persistence.Repositories
             Reviews = new BaseRepository<Review>(_context);
             Favourites = new BaseRepository<Favourite>(_context);
             Images = new BaseRepository<Image>(_context);
-        }
+			ReviewVotes=new BaseRepository<ReviewVote>(_context);
+
+
+		}
 
 
         public async Task<int> SaveChangesAsync()

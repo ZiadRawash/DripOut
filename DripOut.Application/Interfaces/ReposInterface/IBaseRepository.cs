@@ -15,6 +15,7 @@ namespace DripOut.Application.Interfaces.ReposInterface
         public  Task<T?> FindAsync(int id);
         public Task<T?> FindAsync(Expression<Func<T, bool>> expression ,
           params Expression<Func<T,object>>[] includes);
+        public Task<T?> FindAsync(Expression<Func<T, bool>> expression );
         public Task<IEnumerable<T>> GetAllAsync();
 
         public Task<IEnumerable<T>?> GetAllAsync(Expression<Func<T, bool>> expression,

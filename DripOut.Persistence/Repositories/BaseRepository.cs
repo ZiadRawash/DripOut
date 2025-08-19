@@ -80,6 +80,19 @@ namespace DripOut.Persistence.Repositories
 
 			return await dbSet.FirstOrDefaultAsync(expression);
 		}
+		public async Task<T?> FindAsync(
+			Expression<Func<T, bool>> expression,
+			Func<IQueryable<T>, IQueryable<T>> include = null)
+			{
+			if (expression == null) throw new ArgumentNullException(nameof(expression));
+
+			IQueryable<T> query = dbSet;
+
+			if (include != null)
+				query = include(query);
+
+			return await query.FirstOrDefaultAsync(expression);
+		}
 
 		public async Task<IEnumerable<T>?> GetAllAsync(Expression<Func<T, bool>> expression, params Expression<Func<T, object>>[] includes)
 		{

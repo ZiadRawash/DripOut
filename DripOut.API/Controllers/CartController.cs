@@ -54,7 +54,7 @@ namespace DripOut.API.Controllers
 			{
 				return Ok(new ApiResponse
 				{
-					Success = false,
+					Success = true,
 					Message = result.Message,
 					Errors = result.Errors
 				});
@@ -67,5 +67,25 @@ namespace DripOut.API.Controllers
 
 			});
 		}
+		[HttpGet("GetCartItems")]
+		public async Task<IActionResult> GetCartItems()
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			var result = await _cartService.GetAllCartItems(userId);
+			if (result.IsSucceeded)
+				return Ok(result);
+			return BadRequest(
+				new
+				{
+					Success = false,
+					Message = result.Message,
+					Errors = result.Errors
+				}
+
+				);
+			
+
+		}
+
 	}
 }

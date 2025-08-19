@@ -4,6 +4,7 @@ using DripOut.Application.Interfaces.ReposInterface;
 using DripOut.Application.Interfaces.Services;
 using DripOut.Domain.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -97,6 +98,65 @@ namespace DripOut.Application.ApplicationServices
 			await _unitOfWork.CartItems.DeleteAsync(cartItem);
 			await _unitOfWork.SaveChangesAsync();
 			return Result.Success("Cart item deleted successfully");
+		}
+
+		public async Task<Result<CartReturnDto>> GetAllCartItems(string userId)
+		{
+			if (string.IsNullOrEmpty(userId))
+				return Result<CartReturnDto>.Failure(new List<string> { "User Unauthorized" });
+
+			var cartfound = await _unitOfWork.Carts.FindAsync(
+		x => x.AppUserId == userId,
+		q => q.Include(c => c.CartItems)
+			  .ThenInclude(ci => ci.ProductVariant)
+				  .ThenInclude(pv => pv.Product)
+					  .ThenInclude(p => p.Images));
+
+
+
+			if (cartfound == null)
+				return Result<CartReturnDto>.Failure(new List<string> { "User doesn't have a cart yet" });
+
+			var cartItems = new List<CartItemDto>();
+			decimal cartSubtotal = 0;
+			decimal totalDiscount = 0;
+
+			foreach (var item in cartfound.CartItems)
+			{
+				var product = item.ProductVariant.Product;
+				decimal itemSubtotal = product.Price * item.Quantity;
+				decimal itemDiscount = itemSubtotal * (decimal)(product.Discount / 100);
+
+				var cartItemDto = new CartItemDto
+				{
+					CartId = item.Id,
+					VarientName = product.Title,
+					Quantity = item.Quantity,
+					VariantId = item.ProductVariantId,
+					UnitPrice = product.Price,
+					Subtotal = itemSubtotal,
+					DiscountApplied = itemDiscount,
+					Total = itemSubtotal - itemDiscount,
+					ImageUrl = product.Images
+						.Select(x => x.ImageUrl)
+						.FirstOrDefault(u => !string.IsNullOrEmpty(u)) ?? string.Empty
+				};
+
+				cartItems.Add(cartItemDto);
+				cartSubtotal += itemSubtotal;
+				totalDiscount += itemDiscount;
+			}
+
+			var result = new CartReturnDto
+			{
+				Items = cartItems,
+				TotalItems = cartItems.Count,
+				CartSubtotal = cartSubtotal,
+				TotalDiscount = totalDiscount,
+				CartTotal = cartSubtotal - totalDiscount
+			};
+
+			return Result<CartReturnDto>.Success(result, "Cart items retrieved successfully");
 		}
 	}
 }

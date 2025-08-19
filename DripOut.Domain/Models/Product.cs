@@ -28,7 +28,7 @@ namespace DripOut.Domain.Models
         [Range(0,100)]
         public int Amount { get; set; }
 
-        [MinLength(0)]
+        [MinLength(0),MaxLength(100)]
         public double Discount { get; set; } = 0.0;
 
         [Range(0,5)]

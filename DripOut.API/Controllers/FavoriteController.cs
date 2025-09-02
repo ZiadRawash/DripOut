@@ -11,32 +11,32 @@ namespace DripOut.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-    public class FavouriteController : ControllerBase
+    public class FavoriteController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public FavouriteController(IUnitOfWork unitOfWork)
+        public FavoriteController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetFavourites()
+        public async Task<IActionResult> GetFavorites()
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("User not authenticated");
             }
-            var favourites = await _unitOfWork.Favourites.GetAllAsync(f => f.AppUserId == userId, f => f.Product!);
-            if (favourites is null || !favourites.Any())
-                return NotFound("No Favourites Found");
-            var products = favourites.Select(f => f.Product.MapToProductDTO()).ToList();
+            var favorites = await _unitOfWork.Favourites.GetAllAsync(f => f.AppUserId == userId, f => f.Product!);
+            if (favorites is null || !favorites.Any())
+                return NotFound("No favorite Found");
+            var products = favorites.Select(f => f.Product.MapToProductDTO()).ToList();
             return Ok(products);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddToFavourites(int productId)
+        public async Task<IActionResult> AddToFavorite(int productId)
         {
             var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!;
             if (string.IsNullOrEmpty(userId))
@@ -46,18 +46,19 @@ namespace DripOut.API.Controllers
             var product = await _unitOfWork.Products.FindAsync(productId);
             if(product is null)
                 return BadRequest("Product not found");
-            var favourites = await _unitOfWork.Favourites.GetAllAsync(f => f.AppUserId == userId && f.ProductId == productId);
-            if (favourites is not null && favourites.Any())
+            var favorites = await _unitOfWork.Favourites.GetAllAsync(f => f.AppUserId == userId && f.ProductId == productId);
+            if (favorites is not null && favorites.Any())
             {
-                return BadRequest("Product already in favourites");
+                return BadRequest("Product already in favorite");
             }
-            var favourite = new Favourite
+            var favorite = new Favourite
             {
                 AppUserId = userId,
                 ProductId = productId,
             };
-            await _unitOfWork.Favourites.AddAsync(favourite);
-            return Created();
+            await _unitOfWork.Favourites.AddAsync(favorite);
+			await _unitOfWork.SaveChangesAsync();
+			return Created();
         }
     }
 }

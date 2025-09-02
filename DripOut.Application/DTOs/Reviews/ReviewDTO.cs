@@ -18,6 +18,8 @@ namespace DripOut.Application.DTOs.Reviews
         public double Stars { get; set; } = 1;
         public DateTime CreatedOn { get; set; }
         public UserDTO User { get; set; } = default!;
+        public int Ups { get; set; }
+        public int Downs { get; set; }
 
-    }
+}
 }

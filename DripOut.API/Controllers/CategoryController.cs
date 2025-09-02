@@ -61,6 +61,7 @@ namespace DripOut.API.Controllers
                 Name = inputCategory.Name
             };
             await _unitOfWork.Categories.AddAsync(category);
+            await _unitOfWork.SaveChangesAsync();
             return Created();
         }
 
@@ -72,7 +73,8 @@ namespace DripOut.API.Controllers
                 return NotFound();
             category!.Name = inputCategory.Name;
             await _unitOfWork.Categories.UpdateAsync(category)!;
-            return Created();
+			await _unitOfWork.SaveChangesAsync();
+			return Created();
         }
 
         [HttpDelete("{id}")]
@@ -82,7 +84,8 @@ namespace DripOut.API.Controllers
             if (category == null)
                 return NotFound();
             await _unitOfWork.Products.DeleteAsync(category);
-            return NoContent();
+			await _unitOfWork.SaveChangesAsync();
+			return NoContent();
         }
     }
 }

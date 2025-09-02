@@ -1,4 +1,5 @@
-﻿using DripOut.Application.DTOs.Reviews;
+﻿using DripOut.Application.DTOs;
+using DripOut.Application.DTOs.Reviews;
 using DripOut.Application.Interfaces.ReposInterface;
 using DripOut.Application.Interfaces.Services;
 using DripOut.Application.Mappers;
@@ -22,164 +23,75 @@ namespace DripOut.API.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IProductService _prdService;
-		public ReviewController(IUnitOfWork unitOfWork , IProductService _prdService)
+        private readonly IReviewService _revService;
+		public ReviewController(IUnitOfWork unitOfWork , IProductService _prdService, IReviewService IReviewService)
         {
             _unitOfWork = unitOfWork;
             this._prdService = _prdService;
-        }
+			_revService = IReviewService;
 
-        [HttpPost()]
-        public async Task<IActionResult> CreateReview(ReviewInputDTO inputReview)
-        {
-            if (ModelState.IsValid)
-            {
-                var product = await _unitOfWork.Products.FindAsync(inputReview.ProductId)!;
-                if(product == null)
-                    return BadRequest("Product not found");
-                var review = new Review
-                {
-                    ReviewText = inputReview.ReviewText,
-                    Stars = inputReview.Stars,
-                    CreatedOn = DateTime.UtcNow,
-                    ProductId = inputReview.ProductId,
-                    Product = product,
-                    AppUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value!,
-                };
-                await _unitOfWork.Reviews.AddAsync(review);
-                await _prdService.UpdateRateAsync(inputReview.ProductId);
-                return Created();
-            }
-            return BadRequest(ModelState);
-        }
+		}
 
-        [HttpGet("Reviews/{productId:int}")]
-        public async Task<IActionResult> GetReviewsAsync(int productId )
-        {
-            var reviews = await _unitOfWork.Reviews.GetAllAsync(r => r.ProductId == productId, r => r.User!, r => r.User!.Image!);
-            if (reviews == null)
-                return NotFound("No Reviews Found");
-            return Ok(reviews.Select(r => r.MapToDTO()));
+		[HttpPost]
+		public async Task<IActionResult> CreateReview([FromBody] ReviewInputDTO inputReview)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(ModelState);
 
-        }
+			var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+			if (string.IsNullOrWhiteSpace(userId))
+				return Unauthorized(new ApiResponse { Success = false, Message = "Unauthorized" });
+
+			var result = await _revService.CreateReview(inputReview, userId);
+
+			var response = new ApiResponse
+			{
+				Success = result.IsSucceeded,
+				Message = result.Message,
+				Errors = result.Errors
+			};
+
+			return result.IsSucceeded ? Ok(response) : BadRequest(response);
+		}
+
+		[HttpGet("Reviews/{productId:int}")]
+		public async Task<IActionResult> GetReviewsAsync(int productId)
+		{
+			var result = await _revService.GetReviewsAsync(productId);
+
+			return result.IsSucceeded
+				? Ok(new ApiResponse<IEnumerable<ReviewDTO>> { Success = true, Data = result.Data, Message = result.Message })
+				: NotFound(new ApiResponse { Success = false, Errors = result.Errors, Message = result.Message });
+		}
 
 
-        [HttpPost("UpVote/{reviewId}")]
+
+		[HttpPost("ToggleUpVote/{reviewId}")]
 		public async Task<IActionResult> ToggleUpVoteAsync(int reviewId)
 		{
-			var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 			if (userId == null)
 				return Unauthorized();
 
-		
-			var review = await _unitOfWork.Reviews.FindAsync(x => x.Id == reviewId);
-			if (review == null)
-				return NotFound("Review not found");
+			var result = await _revService.ToggleUpVoteAsync(reviewId, userId);
 
-			
-			var existingVote = await _unitOfWork.ReviewVotes
-				.FindAsync(v => v.ReviewId == reviewId && v.AppUserId == userId);
-
-			if (existingVote == null)
-			{
-				
-				review.Ups += 1;
-				await _unitOfWork.ReviewVotes.AddAsync(new ReviewVote
-				{
-					AppUserId = userId,
-					ReviewId = reviewId,
-					Voteddown = false,
-					Votedup = true,
-				});
-			}
-			else if (existingVote.Votedup)
-			{
-			
-				review.Ups -= 1;
-				await _unitOfWork.ReviewVotes.DeleteAsync(existingVote);
-			}
-			else if (existingVote.Voteddown)
-			{
-				
-				review.Downs -= 1;
-				review.Ups += 1;
-				existingVote.Votedup = true;
-				existingVote.Voteddown = false;
-				await _unitOfWork.ReviewVotes.DeleteAsync(existingVote);
-			}
-
-			await _unitOfWork.SaveChangesAsync();
-
-			return Ok(new
-			{
-				ups = review.Ups,
-				downs = review.Downs,
-				score = review.Ups - review.Downs,
-				userVoteType = GetCurrentVoteType(existingVote)
-			});
+			return result.IsSucceeded
+				? Ok(new ApiResponse<VoteResponseDTO> { Success = true, Data = result.Data, Message = result.Message })
+				: BadRequest(new ApiResponse { Success = false, Errors = result.Errors, Message = result.Message });
 		}
 
-		[HttpPost("DownVote/{reviewId}")]
+		[HttpPost("ToggleDownVote/{reviewId}")]
 		public async Task<IActionResult> ToggleDownVoteAsync(int reviewId)
 		{
-			var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 			if (userId == null)
 				return Unauthorized();
 
-			
-			var review = await _unitOfWork.Reviews.FindAsync(x => x.Id == reviewId);
-			if (review == null)
-				return NotFound("Review not found");
+			var result = await _revService.ToggleDownVoteAsync(reviewId, userId);
 
-			
-			var existingVote = await _unitOfWork.ReviewVotes
-				.FindAsync(v => v.ReviewId == reviewId && v.AppUserId == userId);
-
-			if (existingVote == null)
-			{
-				
-				review.Downs += 1;
-				await _unitOfWork.ReviewVotes.AddAsync(new ReviewVote
-				{
-					AppUserId = userId,
-					ReviewId = reviewId,
-					Voteddown = true,
-					Votedup = false,
-				});
-			}
-			else if (existingVote.Voteddown)
-			{
-				
-				review.Downs -= 1;
-				await _unitOfWork.ReviewVotes.DeleteAsync(existingVote);
-			}
-			else if (existingVote.Votedup)
-			{
-				
-				review.Ups -= 1;
-				review.Downs += 1;
-				existingVote.Votedup = false;
-				existingVote.Voteddown = true;
-			    await _unitOfWork.ReviewVotes.UpdateAsync(existingVote);
-			}
-
-			await _unitOfWork.SaveChangesAsync();
-
-			return Ok(new
-			{
-				ups = review.Ups,
-				downs = review.Downs,
-				score = review.Ups - review.Downs,
-				userVoteType = GetCurrentVoteType(existingVote)
-			});
-		}
-
-
-		private string? GetCurrentVoteType(ReviewVote? vote)
-		{
-			if (vote == null) return null;
-			if (vote.Votedup) return "upvote";
-			if (vote.Voteddown) return "downvote";
-			return null;
+			return result.IsSucceeded
+				? Ok(new ApiResponse<VoteResponseDTO> { Success = true, Data = result.Data, Message = result.Message })
+				: BadRequest(new ApiResponse { Success = false, Errors = result.Errors, Message = result.Message });
 		}
 
 	}

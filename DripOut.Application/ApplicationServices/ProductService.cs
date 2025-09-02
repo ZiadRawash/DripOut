@@ -13,7 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DripOut.Application.AuthenticationService
+namespace DripOut.Application.ProductService
 {
 	public class ProductService : IProductService
 	{
@@ -97,6 +97,7 @@ namespace DripOut.Application.AuthenticationService
 
 			product.Rate = (float)product.Reviews.Average(r => r.Stars);
 			await _prdRepo.UpdateAsync(product);
+			await _unitOfWork.SaveChangesAsync();
 			return product;
 		}
 
@@ -120,6 +121,7 @@ namespace DripOut.Application.AuthenticationService
 				}
 			}
 			await _prdRepo.AddAsync(product);
+			await _unitOfWork.SaveChangesAsync();
 			return product;
 		}
 
@@ -134,6 +136,7 @@ namespace DripOut.Application.AuthenticationService
 			product.Amount += variant.StockQuantity;
 			await _unitOfWork.Products.UpdateAsync(product);
 			await _unitOfWork.Variants.AddAsync(variant);
+			await _unitOfWork.SaveChangesAsync();
 			return true;
 		}
 
@@ -145,6 +148,7 @@ namespace DripOut.Application.AuthenticationService
 
 			product.UpdateProduct(inputProduct);
 			await _unitOfWork.Products.UpdateAsync(product);
+			await _unitOfWork.SaveChangesAsync();
 			return true;
 		}
 
@@ -155,6 +159,7 @@ namespace DripOut.Application.AuthenticationService
 				return false;
 
 			await _unitOfWork.Products.DeleteAsync(product);
+			await _unitOfWork.SaveChangesAsync();
 			return true;
 		}
 

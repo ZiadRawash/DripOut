@@ -16,6 +16,7 @@ using DripOut.Application.Interfaces.ReposInterface;
 using DripOut.Application.Interfaces.Services;
 using Microsoft.OpenApi.Models;
 using DripOut.Application.ApplicationServices;
+using DripOut.Application.ProductService;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
@@ -46,6 +47,7 @@ builder.Configuration
 builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>) );
 //builder.Services.AddScoped<IProductRepository,ProductRepository>();

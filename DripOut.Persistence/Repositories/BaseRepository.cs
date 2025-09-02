@@ -20,7 +20,7 @@ namespace DripOut.Persistence.Repositories
 			if (entity == null) throw new ArgumentNullException(nameof(entity));
 
 			await dbSet.AddAsync(entity);
-			await dbContext.SaveChangesAsync();
+//
 			return entity;
 		}
 
@@ -30,7 +30,7 @@ namespace DripOut.Persistence.Repositories
 				throw new ArgumentNullException(nameof(entities), "Entities collection cannot be null or empty");
 
 			await dbSet.AddRangeAsync(entities);
-			await dbContext.SaveChangesAsync();
+//
 			return entities;
 		}
 
@@ -39,7 +39,7 @@ namespace DripOut.Persistence.Repositories
 			if (entity == null) throw new ArgumentNullException(nameof(entity));
 
 			dbSet.Remove(entity);
-			await dbContext.SaveChangesAsync();
+//
 			return entity;
 		}
 
@@ -50,8 +50,8 @@ namespace DripOut.Persistence.Repositories
 			if (entity == null) throw new ArgumentNullException(nameof(entity));
 
 			dbSet.Update(entity);
-			await dbContext.SaveChangesAsync();
-			return entity;
+
+		 	return  entity;
 		}
 
 		public async Task<T?> FindAsync(int id)

@@ -18,6 +18,9 @@ namespace DripOut.Application.Mappers
                 ReviewText = review.ReviewText,
                 Stars = review.Stars,
                 CreatedOn = review.CreatedOn,
+                Ups=review.Ups,
+                Downs=review.Downs,
+
                 User = new UserDTO
                 {
                     FirstName = review.User!.FirstName,

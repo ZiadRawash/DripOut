@@ -1,195 +1,144 @@
-﻿using DripOut.Application.DTOs.Account;
-using DripOut.Application.AuthenticationService;
-using DripOut.Domain.Consts;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using AuthenticationService = DripOut.Application.AuthenticationService.AuthenticationService;
+﻿using DripOut.Application.Common;
+using DripOut.Application.DTOs;
+using DripOut.Application.DTOs.Account;
 using DripOut.Application.Interfaces.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
-using DripOut.Application.Common;
-using IAuthenticationService = DripOut.Application.Interfaces.Services.IAuthenticationService;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DripOut.API.Controllers
 {
-	[Route("api/Account")]
+	[Route("api/accounts")]
 	[ApiController]
-	public class AccountController : ControllerBase
+	public class AccountsController : ControllerBase
 	{
 		private readonly IAuthenticationService _authService;
 
-		public AccountController(IAuthenticationService authService )
+		public AccountsController(IAuthenticationService authService)
 		{
 			_authService = authService;
 		}
 
-		[HttpPost("Register")]
-		public async Task<IActionResult> Register([FromBody] RegisterDto model)
+		[HttpPost("register")]
+		public async Task<IActionResult> RegisterAsync([FromBody] RegisterDto dto)
 		{
 			if (!ModelState.IsValid)
-			{
-				return BadRequest(ModelState);
-			}
-			var created = await _authService.RegisterAsync(model);
-			if (created.IsSucceeded)
-			{
-				return Ok(new
-				{
-					Message = "Email Sent Successfully"
-				});
-			}
-			else
-			{
-				return BadRequest(new { errors = created.Errors });
-			}
-		}
-		[HttpPost("Verify")]
-		public async Task<IActionResult> VerifyCode([FromBody] VerifyCodeDto model)
-		{
-			if (!ModelState.IsValid)
-			{
-				return BadRequest(ModelState);
-			}
+				return BadRequest(new ApiResponse { Success = false, Errors = new() { "Invalid request data" } });
 
-			var confirmed = await _authService.VerifyUser(model.email, model.code);
-			if (confirmed.IsSucceeded) {
-				return Ok(new
-				{
-					success = true,
-					message = confirmed.Message,					
-					Token = confirmed.Data!.Token,
-					RefreshToken = confirmed.Data!.RefreshToken
-				}
-				);
-
-			}
-			else
-			{
-				return Unauthorized(new
-					{
-					success = false,
-					message = confirmed.Message,
-					errors = confirmed.Errors 
-					}
-				);
-				
-			}
-		}
-
-		[HttpPost("Login")]
-		public async Task<IActionResult> Login([FromBody] LoginDto model)
-		{
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
-			var loggedin = await _authService.LoginAsync(model);
-			if (loggedin.IsSucceeded)
-			{
-				return Ok(new
-				{
-					refreshToken= loggedin.Data!.RefreshToken,
-					token=loggedin.Data.Token,
-
-				});
-			}
-			return BadRequest( new{ message = loggedin.Message + string.Join(",", loggedin.Errors)});
-
-		}
-		[HttpPost]
-		[Route("GenerateAccessToken")]
-		public async Task<IActionResult> GenerateAccessToken(RefreshTokenDto model)
-		{
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
-			var result = await _authService.AccessRefreshToken(model.refreshToken);
-				if (!result.IsSucceeded)
-				{
-					return BadRequest(
-					new
-					{
-						message = result.Errors
-					});
-				}
-				return Ok(new
-				{
-					token = result.Data!.Token
-				});
-			
-		
-		}
-
-		[HttpPost]
-		[Route("LogOut")]
-		public async Task<IActionResult> LogOut(RefreshTokenDto model)
-		{
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
-
-				var result = await _authService.LogOutAsync(model.refreshToken);
-				if (!result.IsSucceeded)
-					return BadRequest(new { message = "failure" });
-				return Ok(new { message = "success" });
-
-		}	
-		[HttpPost("Google-signin")]
-		public async Task<IActionResult> Google_signin([FromBody] GoogleSignupTokenDto model)
-		{
-			if (!ModelState.IsValid)
-				return BadRequest(ModelState);
-
-			var result = await _authService.SigninExternal(model.idToken);
-
+			var result = await _authService.RegisterAsync(dto);
 			if (!result.IsSucceeded)
-				return Unauthorized(new { Errors = result.Errors });
+				return BadRequest(new ApiResponse { Success = false, Message = result.Message, Errors = result.Errors });
 
-			return Ok(
-				new
-				{
-					token = result.Data!.Token,
-					refreshToken = result.Data.RefreshToken
-				}
-				
-				);
+			return Ok(new ApiResponse { Success = true, Message = "Verification email sent successfully" });
 		}
-		[HttpPost("resend-verification")]
-		public async Task<IActionResult> ResendVerificationCode([FromBody] EmailDto model)
+
+		[HttpPost("verify")]
+		public async Task<IActionResult> VerifyAsync([FromBody] VerifyCodeDto dto)
 		{
-			try
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse { Success = false, Errors = new() { "Invalid request data" } });
+
+			var result = await _authService.VerifyUser(dto.email, dto.code);
+			if (!result.IsSucceeded)
+				return Unauthorized(new ApiResponse { Success = false, Message = result.Message, Errors = result.Errors });
+
+			return Ok(new ApiResponse<object>
 			{
-				if (!ModelState.IsValid)
+				Success = true,
+				Message = result.Message,
+				Data = new
 				{
-					return BadRequest(ModelState);
+					Token = result.Data!.Token,
+					RefreshToken = result.Data.RefreshToken
 				}
+			});
+		}
 
-				var result = await _authService.ResendVerificationCodeAsync(model.email);
+		[HttpPost("login")]
+		public async Task<IActionResult> LoginAsync([FromBody] LoginDto dto)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse { Success = false, Errors = new() { "Invalid request data" } });
 
-				if (result.IsSucceeded)
-				{
-					return Ok(new
-					{
-						success = true,
-						message = result.Message,
-					});
-				}
+			var result = await _authService.LoginAsync(dto);
+			if (!result.IsSucceeded)
+				return BadRequest(new ApiResponse { Success = false, Message = result.Message, Errors = result.Errors });
 
-				return BadRequest(new
-				{
-					success = false,
-					message = result.Message,
-					errors = result.Errors
-				});
-			}
-			catch (Exception ex)
+			return Ok(new ApiResponse<object>
 			{
-				return StatusCode(500, new
+				Success = true,
+				Message = "Login successful",
+				Data = new
 				{
-					success = false,
-					message = "An error occurred while processing your request",
-					error = ex.Message
-				});
-			}
+					Token = result.Data!.Token,
+					RefreshToken = result.Data.RefreshToken
+				}
+			});
+		}
+
+		[HttpPost("refresh-token")]
+		public async Task<IActionResult> RefreshTokenAsync([FromBody] RefreshTokenDto dto)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse { Success = false, Errors = new() { "Invalid request data" } });
+
+			var result = await _authService.AccessRefreshToken(dto.refreshToken);
+			if (!result.IsSucceeded)
+				return BadRequest(new ApiResponse { Success = false, Errors = result.Errors });
+
+			return Ok(new ApiResponse<object>
+			{
+				Success = true,
+				Message = "Access token generated successfully",
+				Data = new { Token = result.Data!.Token }
+			});
+		}
+
+		[HttpPost("logout")]
+		public async Task<IActionResult> LogoutAsync([FromBody] RefreshTokenDto dto)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse { Success = false, Errors = new() { "Invalid request data" } });
+
+			var result = await _authService.LogOutAsync(dto.refreshToken);
+			if (!result.IsSucceeded)
+				return BadRequest(new ApiResponse { Success = false, Message = "Logout failed" });
+
+			return Ok(new ApiResponse { Success = true, Message = "Logout successful" });
+		}
+
+		[HttpPost("google-signin")]
+		public async Task<IActionResult> GoogleSigninAsync([FromBody] GoogleSignupTokenDto dto)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse { Success = false, Errors = new() { "Invalid request data" } });
+
+			var result = await _authService.SigninExternal(dto.idToken);
+			if (!result.IsSucceeded)
+				return Unauthorized(new ApiResponse { Success = false, Errors = result.Errors });
+
+			return Ok(new ApiResponse<object>
+			{
+				Success = true,
+				Message = "Google signin successful",
+				Data = new
+				{
+					Token = result.Data!.Token,
+					RefreshToken = result.Data.RefreshToken
+				}
+			});
+		}
+
+		[HttpPost("resend-verification")]
+		public async Task<IActionResult> ResendVerificationAsync([FromBody] EmailDto dto)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(new ApiResponse { Success = false, Errors = new() { "Invalid request data" } });
+
+			var result = await _authService.ResendVerificationCodeAsync(dto.email);
+			if (!result.IsSucceeded)
+				return BadRequest(new ApiResponse { Success = false, Message = result.Message, Errors = result.Errors });
+
+			return Ok(new ApiResponse { Success = true, Message = result.Message });
 		}
 	}
 }
-

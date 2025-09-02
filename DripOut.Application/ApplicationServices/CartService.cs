@@ -106,8 +106,8 @@ namespace DripOut.Application.ApplicationServices
 				return Result<CartReturnDto>.Failure(new List<string> { "User Unauthorized" });
 
 			var cartfound = await _unitOfWork.Carts.FindAsync(
-		x => x.AppUserId == userId,
-		q => q.Include(c => c.CartItems)
+			x => x.AppUserId == userId,
+			q => q.Include(c => c.CartItems)
 			  .ThenInclude(ci => ci.ProductVariant)
 				  .ThenInclude(pv => pv.Product)
 					  .ThenInclude(p => p.Images));

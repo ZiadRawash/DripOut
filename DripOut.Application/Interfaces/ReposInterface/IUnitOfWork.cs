@@ -10,15 +10,17 @@ namespace DripOut.Application.Interfaces.ReposInterface
 {
     public interface IUnitOfWork : IAsyncDisposable
     {
-        IBaseRepository<Product> Products { get; }
+
+		IBaseRepository<Product> Products { get; }
         IBaseRepository<Category> Categories { get; }
         IBaseRepository<ProductVariant> Variants { get; }
         IBaseRepository<Review> Reviews { get; }
-        IBaseRepository<Favourite> Favourites { get; }
+        IBaseRepository<Favourite> Favorites { get; }
         IBaseRepository<Image> Images { get; }
         IBaseRepository<ReviewVote> ReviewVotes{get; }
         IBaseRepository<Cart> Carts{get; }
         IBaseRepository<CartItem> CartItems { get; }
+        IBaseRepository<Governorate> Governorates { get; }
         Task<int> SaveChangesAsync();
 
     }

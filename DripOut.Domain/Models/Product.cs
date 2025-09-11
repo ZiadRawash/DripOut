@@ -34,15 +34,15 @@ namespace DripOut.Domain.Models
         [Range(0,5)]
         public float Rate { get; set; } = 0;
 
-        public virtual ICollection<ProductVariant>? Variants { get; set; }
+        public virtual ICollection<ProductVariant> Variants { get; set; }=new List<ProductVariant>();
         public virtual ICollection<Image>? Images { get; set; }
 
         public int CategoryId { get; set; }
-        public Category? Category { get; set; }
+        public Category Category { get; set; }=null!;   
 
-        public ICollection<Review>? Reviews { get; set; }
+        public ICollection<Review>? Reviews { get; set; } = new List<Review>();
 
-        public IList<Favourite> Favourites { get; set; } = new List<Favourite>();
+		public IList<Favourite> Favorites { get; set; } = new List<Favourite>();
 
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DripOut.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250818201242_CartsAndOrders")]
-    partial class CartsAndOrders
+    [Migration("20250906132111_orders_orderItems_Governorates")]
+    partial class orders_orderItems_Governorates
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -234,6 +234,7 @@ namespace DripOut.Persistence.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<double>("Discount")
+                        .HasMaxLength(100)
                         .HasColumnType("float");
 
                     b.Property<decimal>("Price")

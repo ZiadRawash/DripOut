@@ -14,78 +14,144 @@ namespace DripOut.API.Controllers
 	public class CartController : ControllerBase
 	{
 		private readonly ICartService _cartService;
+
 		public CartController(ICartService cartService)
 		{
 			_cartService = cartService;
-			
 		}
-		[HttpPost("Add")]
-		public async Task<IActionResult> AddToCart(AddToCartDTO model)
+
+		/// <summary>
+		/// Add item to cart
+		/// </summary>
+		[HttpPost("items")]
+		public async Task<ActionResult<ApiResponse>> AddItemToCart(AddToCartDTO model)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 			if (string.IsNullOrEmpty(userId))
+			{
 				return Unauthorized(new ApiResponse
 				{
 					Success = false,
 					Message = "User not authenticated"
 				});
+			}
 
 			var result = await _cartService.AddToCart(model, userId);
-			
-			return result.IsSucceeded 
-				? Ok(new ApiResponse
-				{
-					Success = true,
-					Message = result.Message
-				})
-				: BadRequest(new ApiResponse
-				{
-					Success = false,
-					Message = result.Message,
-					Errors = result.Errors
-				});
-		}
-		[HttpDelete("Delete/{id}")]
-		public async Task<IActionResult> DeleteCartItem(int id)
-		{
-			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-			var result = await _cartService.DeleteCartItem(id, userId);
 			if (result.IsSucceeded)
 			{
 				return Ok(new ApiResponse
 				{
 					Success = true,
-					Message = result.Message,
-					Errors = result.Errors
+					Message = result.Message
 				});
 			}
+
 			return BadRequest(new ApiResponse
 			{
 				Success = false,
-				Errors = result.Errors,
-				Message = result.Message
-
+				Message = result.Message,
+				Errors = result.Errors
 			});
 		}
-		[HttpGet("GetCartItems")]
-		public async Task<IActionResult> GetCartItems()
+
+		/// <summary>
+		/// Delete specific cart item
+		/// </summary>
+		[HttpDelete("items/{cartItemId:int}")]
+		public async Task<ActionResult<ApiResponse>> DeleteCartItem(int cartItemId)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-			var result = await _cartService.GetAllCartItems(userId);
-			if (result.IsSucceeded)
-				return Ok(result);
-			return BadRequest(
-				new
+			if (string.IsNullOrEmpty(userId))
+			{
+				return Unauthorized(new ApiResponse
 				{
 					Success = false,
-					Message = result.Message,
-					Errors = result.Errors
-				}
+					Message = "User not authenticated"
+				});
+			}
 
-				);
-			
+			var result = await _cartService.DeleteCartItem(cartItemId, userId);
+			if (result.IsSucceeded)
+			{
+				return Ok(new ApiResponse
+				{
+					Success = true,
+					Message = result.Message
+				});
+			}
 
+			return BadRequest(new ApiResponse
+			{
+				Success = false,
+				Message = result.Message,
+				Errors = result.Errors
+			});
 		}
 
+		/// <summary>
+		/// Get all cart items for the authenticated user
+		/// </summary>
+		[HttpGet("items")]
+		public async Task<ActionResult<ApiResponse<CartReturnDto>>> GetCartItems()
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			if (string.IsNullOrEmpty(userId))
+			{
+				return Unauthorized(new ApiResponse<CartReturnDto>
+				{
+					Success = false,
+					Message = "User not authenticated"
+				});
+			}
+
+			var result = await _cartService.GetAllCartItems(userId);
+			if (result.IsSucceeded)
+			{
+				return Ok(new ApiResponse<CartReturnDto>
+				{
+					Success = true,
+					Message = result.Message,
+					Data = result.Data
+				});
+			}
+
+			return BadRequest(new ApiResponse<CartReturnDto>
+			{
+				Success = false,
+				Message = result.Message,
+				Errors = result.Errors
+			});
+		}
+		[HttpPut("items")]
+		public async Task<ActionResult<ApiResponse>> UpdateCartItemQuantity([FromBody] UpdateCartItemDTO model)
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			var result = await _cartService.UpdateCartItemQuantity(model.cartItemId,model.Quantity,userId);
+			var response = new ApiResponse()
+			{
+				Success = result.IsSucceeded,
+				Message = result.Message,
+				Errors = result.Errors
+			};
+			if (result.IsSucceeded)
+				return Ok(response);
+			return BadRequest(response);
+		}
+		[HttpDelete("clear")]
+		public async Task<ActionResult<ApiResponse>> ClearCart()
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			var result = await _cartService.ClearCart(userId);
+			var response = new ApiResponse()
+			{
+				Success = result.IsSucceeded,
+				Message = result.Message,
+				Errors = result.Errors
+			};
+			if (result.IsSucceeded)
+				return Ok(response);
+			return BadRequest(response);
+		}
 	}
 }

@@ -214,7 +214,7 @@ namespace DripOut.Infrastructure.Implementation
 						};
 					}
 				}
-				catch (Exception ex)
+				catch 
 				{
 
 					return new ImageUploadResult

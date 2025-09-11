@@ -128,7 +128,7 @@ namespace DripOut.Persistence.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Favourites");
+                    b.ToTable("Favorites");
                 });
 
             modelBuilder.Entity("DripOut.Domain.Models.Image", b =>
@@ -481,13 +481,13 @@ namespace DripOut.Persistence.Migrations
             modelBuilder.Entity("DripOut.Domain.Models.Favourite", b =>
                 {
                     b.HasOne("DripOut.Domain.Models.AppUser", "AppUser")
-                        .WithMany("Favourites")
+                        .WithMany("Favorites")
                         .HasForeignKey("AppUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("DripOut.Domain.Models.Product", "Product")
-                        .WithMany("Favourites")
+                        .WithMany("Favorites")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -637,7 +637,7 @@ namespace DripOut.Persistence.Migrations
 
             modelBuilder.Entity("DripOut.Domain.Models.AppUser", b =>
                 {
-                    b.Navigation("Favourites");
+                    b.Navigation("Favorites");
 
                     b.Navigation("Image");
 
@@ -655,7 +655,7 @@ namespace DripOut.Persistence.Migrations
 
             modelBuilder.Entity("DripOut.Domain.Models.Product", b =>
                 {
-                    b.Navigation("Favourites");
+                    b.Navigation("Favorites");
 
                     b.Navigation("Images");
 

@@ -28,7 +28,7 @@ namespace DripOut.API.Controllers
             {
                 return Unauthorized("User not authenticated");
             }
-            var favorites = await _unitOfWork.Favourites.GetAllAsync(f => f.AppUserId == userId, f => f.Product!);
+            var favorites = await _unitOfWork.Favorites.GetAllAsync(f => f.AppUserId == userId, f => f.Product!);
             if (favorites is null || !favorites.Any())
                 return NotFound("No favorite Found");
             var products = favorites.Select(f => f.Product.MapToProductDTO()).ToList();
@@ -46,7 +46,7 @@ namespace DripOut.API.Controllers
             var product = await _unitOfWork.Products.FindAsync(productId);
             if(product is null)
                 return BadRequest("Product not found");
-            var favorites = await _unitOfWork.Favourites.GetAllAsync(f => f.AppUserId == userId && f.ProductId == productId);
+            var favorites = await _unitOfWork.Favorites.GetAllAsync(f => f.AppUserId == userId && f.ProductId == productId);
             if (favorites is not null && favorites.Any())
             {
                 return BadRequest("Product already in favorite");
@@ -56,7 +56,7 @@ namespace DripOut.API.Controllers
                 AppUserId = userId,
                 ProductId = productId,
             };
-            await _unitOfWork.Favourites.AddAsync(favorite);
+            await _unitOfWork.Favorites.AddAsync(favorite);
 			await _unitOfWork.SaveChangesAsync();
 			return Created();
         }

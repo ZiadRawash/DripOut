@@ -17,8 +17,15 @@ namespace DripOut.Persistence
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<ProductVariant> ProductVariants { get; set; }
 		public DbSet<Review> Reviews { get; set; }
-		public DbSet<Favourite> Favourites { get; set; }
+		public DbSet<Favourite> Favorites { get; set; }
 		public DbSet<ReviewVote> ReviewVotes { get; set; }
+		public DbSet<Cart> Carts { get; set; }
+		public DbSet<CartItem> CartItems { get; set; }
+		public DbSet<Governorate> Governorates { get; set; }
+		public DbSet<Order> Orders { get; set; }
+		public DbSet<OrderItem> OrderItems { get; set; }
+
+
 
         protected override void OnModelCreating(ModelBuilder builder)
 		{
@@ -40,11 +47,11 @@ namespace DripOut.Persistence
 			builder.Entity<Favourite>().HasKey(f => new { f.AppUserId, f.ProductId });
 			builder.Entity<Favourite>()
 				.HasOne(f => f.AppUser)
-				.WithMany(u => u.Favourites)
+				.WithMany(u => u.Favorites)
 				.HasForeignKey(f => f.AppUserId);
             builder.Entity<Favourite>()
                 .HasOne(f => f.Product)
-                .WithMany(u => u.Favourites)
+                .WithMany(u => u.Favorites)
                 .HasForeignKey(f => f.ProductId);
 
             List<IdentityRole> roles = new List<IdentityRole>

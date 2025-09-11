@@ -14,5 +14,7 @@ namespace DripOut.Application.Interfaces.Services
 		public Task<Result> AddToCart(AddToCartDTO model, string userId);
 		public Task<Result> DeleteCartItem(int CartItemId, string userId);
 		public Task<Result<CartReturnDto>> GetAllCartItems( string userId);
+		public Task<Result> UpdateCartItemQuantity(int cartItemId, int quantity, string? userId);
+		public Task<Result> ClearCart(string? userId);
 	}
 }

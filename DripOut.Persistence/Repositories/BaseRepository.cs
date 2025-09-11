@@ -82,7 +82,7 @@ namespace DripOut.Persistence.Repositories
 		}
 		public async Task<T?> FindAsync(
 			Expression<Func<T, bool>> expression,
-			Func<IQueryable<T>, IQueryable<T>> include = null)
+			Func<IQueryable<T>, IQueryable<T>> include)
 			{
 			if (expression == null) throw new ArgumentNullException(nameof(expression));
 
@@ -94,7 +94,7 @@ namespace DripOut.Persistence.Repositories
 			return await query.FirstOrDefaultAsync(expression);
 		}
 
-		public async Task<IEnumerable<T>?> GetAllAsync(Expression<Func<T, bool>> expression, params Expression<Func<T, object>>[] includes)
+		public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> expression, params Expression<Func<T, object>>[] includes)
 		{
 			if (expression == null) throw new ArgumentNullException(nameof(expression));
 

@@ -57,7 +57,7 @@ namespace DripOut.API.Controllers
 			return Ok(product);
 		}
 
-		[HttpPost("Size")]
+		[HttpPost("product-variance")]
 		public async Task<IActionResult> AddVarient(VariantDTO variantDTO)
 		{
 			if (!ModelState.IsValid)

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DripOut.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250818201242_CartsAndOrders")]
-    partial class CartsAndOrders
+    [Migration("20250907124559_update_order")]
+    partial class update_order
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -121,7 +121,7 @@ namespace DripOut.Persistence.Migrations
                     b.HasIndex("AppUserId")
                         .IsUnique();
 
-                    b.ToTable("Cart");
+                    b.ToTable("Carts");
                 });
 
             modelBuilder.Entity("DripOut.Domain.Models.CartItem", b =>
@@ -147,7 +147,7 @@ namespace DripOut.Persistence.Migrations
 
                     b.HasIndex("ProductVariantId");
 
-                    b.ToTable("CartItem");
+                    b.ToTable("CartItems");
                 });
 
             modelBuilder.Entity("DripOut.Domain.Models.Category", b =>
@@ -183,6 +183,36 @@ namespace DripOut.Persistence.Migrations
                     b.ToTable("Favorites");
                 });
 
+            modelBuilder.Entity("DripOut.Domain.Models.Governorate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("DiscountPercentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("MinimumOrderForFreeShipping")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<decimal>("ShippingCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Governorates");
+                });
+
             modelBuilder.Entity("DripOut.Domain.Models.Image", b =>
                 {
                     b.Property<int>("Id")
@@ -215,6 +245,100 @@ namespace DripOut.Persistence.Migrations
                     b.ToTable("Images");
                 });
 
+            modelBuilder.Entity("DripOut.Domain.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AppUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("GovernorateId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PaymentIntentId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShippingAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("ShippingCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("ShippingCostSnapShot")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ShippingGovernorateNameSnapshot")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShippingName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ShippingPhone")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
+
+                    b.HasIndex("GovernorateId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("DripOut.Domain.Models.OrderItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("orderItems");
+                });
+
             modelBuilder.Entity("DripOut.Domain.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -234,6 +358,7 @@ namespace DripOut.Persistence.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<double>("Discount")
+                        .HasMaxLength(100)
                         .HasColumnType("float");
 
                     b.Property<decimal>("Price")
@@ -595,6 +720,44 @@ namespace DripOut.Persistence.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("DripOut.Domain.Models.Order", b =>
+                {
+                    b.HasOne("DripOut.Domain.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("AppUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DripOut.Domain.Models.Governorate", "Governorate")
+                        .WithMany("Orders")
+                        .HasForeignKey("GovernorateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Governorate");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DripOut.Domain.Models.OrderItem", b =>
+                {
+                    b.HasOne("DripOut.Domain.Models.Order", "Order")
+                        .WithMany("OrderItems")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DripOut.Domain.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("DripOut.Domain.Models.Product", b =>
                 {
                     b.HasOne("DripOut.Domain.Models.Category", "Category")
@@ -741,6 +904,16 @@ namespace DripOut.Persistence.Migrations
             modelBuilder.Entity("DripOut.Domain.Models.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("DripOut.Domain.Models.Governorate", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
+            modelBuilder.Entity("DripOut.Domain.Models.Order", b =>
+                {
+                    b.Navigation("OrderItems");
                 });
 
             modelBuilder.Entity("DripOut.Domain.Models.Product", b =>

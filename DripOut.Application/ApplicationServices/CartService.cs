@@ -67,7 +67,7 @@ namespace DripOut.Application.ApplicationServices
 				
 				var cartItem = new CartItem
 				{
-					CartId = cart.Id,
+					Cart=cart,
 					ProductVariantId = model.Id,
 					Quantity = model.Quantity
 				};
@@ -94,8 +94,9 @@ namespace DripOut.Application.ApplicationServices
 			var cart = await _unitOfWork.Carts.FindAsync(x => x.Id == cartItem.CartId);
 			if (cart == null || cart.AppUserId != userId)
 				return Result.Failure(new List<string> { "Unauthorized to delete this cart item" });
-
 			await _unitOfWork.CartItems.DeleteAsync(cartItem);
+			cart.UpdatedOn = DateTime.Now;
+			await _unitOfWork.Carts.UpdateAsync(cart);
 			await _unitOfWork.SaveChangesAsync();
 			return Result.Success("Cart item deleted successfully");
 		}
@@ -110,7 +111,7 @@ namespace DripOut.Application.ApplicationServices
 			q => q.Include(c => c.CartItems)
 			  .ThenInclude(ci => ci.ProductVariant)
 				  .ThenInclude(pv => pv.Product)
-					  .ThenInclude(p => p.Images));
+					  .ThenInclude(p => p!.Images));
 
 
 
@@ -124,7 +125,7 @@ namespace DripOut.Application.ApplicationServices
 			foreach (var item in cartfound.CartItems)
 			{
 				var product = item.ProductVariant.Product;
-				decimal itemSubtotal = product.Price * item.Quantity;
+				decimal itemSubtotal = product!.Price * item.Quantity;
 				decimal itemDiscount = itemSubtotal * (decimal)(product.Discount / 100);
 
 				var cartItemDto = new CartItemDto
@@ -137,7 +138,7 @@ namespace DripOut.Application.ApplicationServices
 					Subtotal = itemSubtotal,
 					DiscountApplied = itemDiscount,
 					Total = itemSubtotal - itemDiscount,
-					ImageUrl = product.Images
+					ImageUrl = product.Images?
 						.Select(x => x.ImageUrl)
 						.FirstOrDefault(u => !string.IsNullOrEmpty(u)) ?? string.Empty
 				};
@@ -157,6 +158,57 @@ namespace DripOut.Application.ApplicationServices
 			};
 
 			return Result<CartReturnDto>.Success(result, "Cart items retrieved successfully");
+		}
+
+		public async Task<Result> UpdateCartItemQuantity(int cartItemId, int quantity, string? userId = null)
+		{
+			if (string.IsNullOrEmpty(userId))
+				return Result.Failure(new List<string> { "Unauthorized" });
+
+			if (cartItemId <= 0)
+				return Result.Failure(new List<string> { "Invalid cart item id" });
+
+			var cartItem = await _unitOfWork.CartItems.FindAsync(x => x.Id == cartItemId);
+			if (cartItem == null)
+				return Result.Failure(new List<string> { "Cart item not found" });
+
+			var cart = await _unitOfWork.Carts.FindAsync(x => x.Id == cartItem.CartId);
+			if (cart == null || cart.AppUserId != userId)
+				return Result.Failure(new List<string> { "Unauthorized to update this cart item" });
+
+
+			var variant = await _unitOfWork.Variants.FindAsync(x => x.Id == cartItem.ProductVariantId);
+			if (variant == null)
+				return Result.Failure(new List<string> { "Product variant not found" });
+
+			if (variant.StockQuantity < quantity)
+				return Result.Failure(new List<string> { "Requested quantity exceeds available stock" });
+
+			cartItem.Quantity = quantity;
+			cart.UpdatedOn = DateTime.UtcNow;
+
+			await _unitOfWork.CartItems.UpdateAsync(cartItem);
+			await _unitOfWork.SaveChangesAsync();
+
+			return Result.Success("Cart item quantity updated successfully");
+		}
+
+		public async Task<Result> ClearCart(string? userId)
+		{
+			if (string.IsNullOrEmpty(userId))
+				return Result.Failure("User unauthorized");
+			var cart = await _unitOfWork.Carts.FindAsync(x => x.AppUserId == userId, x=>x.CartItems);
+			if (cart==null)
+				return Result.Failure("there is no cart to be cleared");
+			foreach (var item in cart.CartItems)
+			{
+				await _unitOfWork.CartItems.DeleteAsync(item);
+
+			}
+			cart.UpdatedOn = DateTime.UtcNow;
+			await _unitOfWork.Carts.UpdateAsync(cart);
+			await _unitOfWork.SaveChangesAsync();
+			return Result.Success("Cart is cleared successfully");
 		}
 	}
 }

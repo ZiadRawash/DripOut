@@ -18,7 +18,7 @@ namespace DripOut.Domain.Models
 
 		public virtual Image? Image { get; set; }
 
-		public IList<Favourite> Favourites { get; set; } = new List<Favourite>();
+		public IList<Favourite> Favorites { get; set; } = new List<Favourite>();
 		public ICollection<ReviewVote> ReviewVotes { get; set; } = new List<ReviewVote>();
 		public Cart Cart { get; set; } = new Cart();
 	}

@@ -32,7 +32,7 @@ namespace DripOut.API.Controllers
 
 		}
 
-		[HttpPost]
+		[HttpPost("review")]
 		public async Task<IActionResult> CreateReview([FromBody] ReviewInputDTO inputReview)
 		{
 			if (!ModelState.IsValid)
@@ -54,7 +54,7 @@ namespace DripOut.API.Controllers
 			return result.IsSucceeded ? Ok(response) : BadRequest(response);
 		}
 
-		[HttpGet("Reviews/{productId:int}")]
+		[HttpGet("reviews/{productId:int}")]
 		public async Task<IActionResult> GetReviewsAsync(int productId)
 		{
 			var result = await _revService.GetReviewsAsync(productId);
@@ -66,7 +66,7 @@ namespace DripOut.API.Controllers
 
 
 
-		[HttpPost("ToggleUpVote/{reviewId}")]
+		[HttpPost("{reviewId}/vote-up")]
 		public async Task<IActionResult> ToggleUpVoteAsync(int reviewId)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -80,7 +80,7 @@ namespace DripOut.API.Controllers
 				: BadRequest(new ApiResponse { Success = false, Errors = result.Errors, Message = result.Message });
 		}
 
-		[HttpPost("ToggleDownVote/{reviewId}")]
+		[HttpPost("{reviewId}/vote-down")]
 		public async Task<IActionResult> ToggleDownVoteAsync(int reviewId)
 		{
 			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);

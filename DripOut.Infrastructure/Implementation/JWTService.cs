@@ -133,11 +133,12 @@ namespace DripOut.Infrastructure.Implementation
 		{
 			if (string.IsNullOrEmpty(refreshToken))
 				return new JwtResponseDto { IsSucceeded = false, Errors = { "RefreshToken Cant Be Null" } };
+
 			try
 			{
 				var user = await _userManager.Users
-				   .Include(u => u.RefreshToken)
-				   .FirstOrDefaultAsync(x => x.RefreshToken.Any(z => z.Token == refreshToken));
+					.Include(u => u.RefreshToken)
+					.FirstOrDefaultAsync(x => x.RefreshToken.Any(z => z.Token == refreshToken));
 
 				if (user == null)
 					return new JwtResponseDto { IsSucceeded = false, Errors = { "User Not Found" } };
@@ -152,6 +153,20 @@ namespace DripOut.Infrastructure.Implementation
 					};
 				}
 
+				// لو التوكين خلص مدته
+				if (token.ExpiresOn <= DateTime.UtcNow)
+				{
+					token.RevokedOn = DateTime.UtcNow;
+					await _userManager.UpdateAsync(user); // أو _unitOfWork.SaveAsync() لو ماشي بـ UoW
+
+					return new JwtResponseDto
+					{
+						IsSucceeded = false,
+						Message = "Refresh token expired"
+					};
+				}
+
+				// لو التوكين متوسم إنه مش Active
 				if (!token.IsActive)
 				{
 					return new JwtResponseDto
@@ -160,6 +175,7 @@ namespace DripOut.Infrastructure.Implementation
 						Message = "Token is no longer active"
 					};
 				}
+
 				return new JwtResponseDto { IsSucceeded = true, Email = user.Email };
 			}
 			catch (Exception ex)

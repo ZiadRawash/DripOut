@@ -1,5 +1,6 @@
 using DripOut.Application.ApplicationServices;
 using DripOut.Application.AuthenticationService;
+using DripOut.Application.BackgroundJobs;
 using DripOut.Application.Common.Settings;
 using DripOut.Application.DTOs;
 using DripOut.Application.DTOs.Order;
@@ -13,6 +14,8 @@ using DripOut.Infrastructure.Implementation;
 using DripOut.Persistence;
 using DripOut.Persistence.Repositories;
 using FluentValidation;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +25,7 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using System.Reflection;
 using System.Security.Principal;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration
@@ -54,10 +58,6 @@ builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Str
 //Mapping GoogleAuth To class
 builder.Services.Configure<Authentication_google>(builder.Configuration.GetSection("Authentication:Google"));
 
-builder.Configuration
-	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
-
 builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -65,8 +65,10 @@ builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IGovernorateService, GovernorateService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
-builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>) );
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
+// **Register Background Service**
+builder.Services.AddScoped<ReservationCleanupService>();
 
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 		options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
@@ -75,6 +77,12 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// **Add Hangfire Services**
+builder.Services.AddHangfire(config =>
+	config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHangfireServer();
+
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
 
@@ -86,7 +94,7 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 	options.Password.RequireNonAlphanumeric = true;
 	options.Password.RequiredLength = 8;
 	options.SignIn.RequireConfirmedEmail = true;
-	options.Tokens.EmailConfirmationTokenProvider=TokenOptions.DefaultEmailProvider;
+	options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultEmailProvider;
 
 })
 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -121,8 +129,9 @@ builder.Services.AddAuthentication(options =>
 //configure the time of confirmation token
 builder.Services.Configure<DataProtectionTokenProviderOptions>(opt =>
 {
-	opt.TokenLifespan = TimeSpan.FromMinutes(30); 
+	opt.TokenLifespan = TimeSpan.FromMinutes(30);
 });
+
 
 
 builder.Services.AddControllers();
@@ -130,32 +139,32 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
+	c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
 
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter 'Bearer' followed by your token."
-    });
+	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+	{
+		Name = "Authorization",
+		Type = SecuritySchemeType.Http,
+		Scheme = "bearer",
+		BearerFormat = "JWT",
+		In = ParameterLocation.Header,
+		Description = "Enter 'Bearer' followed by your token."
+	});
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
+	c.AddSecurityRequirement(new OpenApiSecurityRequirement
+	{
+		{
+			new OpenApiSecurityScheme
+			{
+				Reference = new OpenApiReference
+				{
+					Type = ReferenceType.SecurityScheme,
+					Id = "Bearer"
+				}
+			},
+			Array.Empty<string>()
+		}
+	});
 });
 
 
@@ -166,7 +175,7 @@ builder.Services.AddCors(options =>
 	options.AddPolicy(name: MyAllowedOrigins,
 					  policy =>
 					  {
-						  policy.WithOrigins("http://localhost:3000") 
+						  policy.WithOrigins("http://localhost:3000")
 								.AllowAnyHeader()
 								.AllowAnyMethod();
 					  });
@@ -178,6 +187,7 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+
 	app.UseSwagger();
 	app.UseSwaggerUI();
 }
@@ -191,7 +201,18 @@ app.UseAuthentication();
 
 app.UseAuthorization();
 
+// **Add Hangfire Dashboard**
+app.UseHangfireDashboard("/hangfire");
+
 app.MapControllers();
+
+// **Schedule Recurring Jobs
+RecurringJob.AddOrUpdate<ReservationCleanupService>(
+	"cleanup-expired-reservations",
+	service => service.CleanupExpiredReservations(),
+	"*/5 * * * *"
+);
+
 try
 {
 	Log.Information("Starting DripOut web application");

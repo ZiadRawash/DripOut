@@ -13,6 +13,7 @@ namespace DripOut.Application.Interfaces.Services
 		Task<Result<CheckoutResponseDTO>> CheckOut(PostShippingOrderDTO dto, string userId);
 		Task <Result> ConfirmOrder(int orderId);
 		Task<Result> ProcessPaymentWebhook(int orderId, bool paymentSucceeded);
+		Task<Result> ValidateOrderBeforePayment(int orderId);
 
 	}
 }

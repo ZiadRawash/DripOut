@@ -111,7 +111,22 @@ namespace DripOut.API.Controllers
 				_logger.LogError(ex, " error occuared with this payment ");
 				return BadRequest();
 			}
+		}
+		[HttpGet("{orderId}/validate")]
+		public async Task<ActionResult<ApiResponse>> ValidateOrder(int orderId)
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+			if (string.IsNullOrEmpty(userId))
+			{
+				return Unauthorized(new ApiResponse { Success = false, Message = "Unauthorized" });
 			}
+
+			var result = await _orderService.ValidateOrderBeforePayment(orderId);
+
+			return result.IsSucceeded
+				? Ok(new ApiResponse { Success = true, Message = result.Message })
+				: BadRequest(new ApiResponse { Success = false, Message = result.Message, Errors = result.Errors });
+		}
 	}
-	
+
 }

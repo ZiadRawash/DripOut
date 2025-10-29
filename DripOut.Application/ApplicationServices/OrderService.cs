@@ -337,6 +337,50 @@ namespace DripOut.Application.ApplicationServices
 			}
 			return shippingPrice;
 		}
+		public async Task<Result> ValidateOrderBeforePayment(int orderId)
+		{
+			var order = await _unitOfWork.Orders.FindAsync(
+				x => x.Id == orderId,
+				q => q.Include(o => o.OrderItems)
+					  .ThenInclude(oi => oi.StockReservation)
+			);
+
+			if (order == null || order.Status != OrderStatus.AwaitingPayment)
+			{
+				return Result.Failure("Order not valid", new List<string> { "InvalidOrder" });
+			}
+
+			// Check if any reservation expired
+			var anyExpired = order.OrderItems.Any(oi =>
+				oi.StockReservation == null || oi.StockReservation.IsExpired);
+
+			if (anyExpired)
+			{
+				// Cancel order and payment
+				if (!string.IsNullOrEmpty(order.PaymentIntentId))
+				{
+					await _stripeService.CancelPaymentAsync(order.PaymentIntentId);
+				}
+
+				var reservations = order.OrderItems
+					.Where(oi => oi.StockReservation != null)
+					.Select(oi => oi.StockReservation!)
+					.ToList();
+
+				if (reservations.Any())
+				{
+					await _unitOfWork.StockReservations.DeleteRangeAsync(reservations);
+				}
+
+				order.Status = OrderStatus.Cancelled;
+				await _unitOfWork.SaveChangesAsync();
+
+				return Result.Failure("Reservation expired", new List<string> { "ExpiredReservation" });
+			}
+
+			return Result.Success("Order is valid");
+		}
+
 	}
 
 	

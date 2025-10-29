@@ -8,7 +8,7 @@ namespace DripOut.Application.DTOs.Cart
 {
 	public class CartItemDto
 	{
-		public int CartId { get; set; }
+		public int Id { get; set; }
 		public int VariantId { get; set; }
 		public string VarientName { get; set; }=string.Empty;
 		public string ImageUrl { get; set; } = string.Empty;

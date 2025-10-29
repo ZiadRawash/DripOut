@@ -22,6 +22,10 @@ namespace DripOut.Persistence.Repositories
         public IBaseRepository<Cart> Carts { get; private set; }
         public IBaseRepository<CartItem> CartItems { get; private set; }
         public IBaseRepository<Governorate> Governorates { get; private set; }
+        public IBaseRepository<StockReservation> StockReservations { get; private set; }
+        public IBaseRepository<Order> Orders { get; private set; }
+        public IBaseRepository<OrderItem> OrderItems { get; private set; }
+
 
         public UnitOfWork(ApplicationDbContext context)
         {
@@ -36,6 +40,9 @@ namespace DripOut.Persistence.Repositories
             CartItems=new BaseRepository<CartItem>(_context);
             Carts=new BaseRepository<Cart>(_context);
 			Governorates= new BaseRepository<Governorate>(_context);
+			StockReservations = new BaseRepository<StockReservation>(_context);
+			Orders = new BaseRepository<Order>(_context);
+			OrderItems = new BaseRepository<OrderItem>(_context);
 
 		}
 

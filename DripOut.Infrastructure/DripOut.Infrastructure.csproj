@@ -16,6 +16,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.15" />
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="9.0.4" />
     <PackageReference Include="MimeKit" Version="4.13.0" />
+    <PackageReference Include="Stripe.net" Version="48.5.0" />
   </ItemGroup>
 
   <ItemGroup>

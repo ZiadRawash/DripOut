@@ -16,58 +16,77 @@ namespace DripOut.Application.ApplicationServices
 {
 	public class CartService : ICartService
 	{
-		public readonly IUnitOfWork _unitOfWork;
+		private readonly IUnitOfWork _unitOfWork; 
 		public CartService(IUnitOfWork unitOfWork)
 		{
-		_unitOfWork = unitOfWork;	
+			_unitOfWork = unitOfWork;
 		}
+
 		public async Task<Result> AddToCart(AddToCartDTO model, string userId)
 		{
-			if (userId == null)
-				return Result.Failure(new List<string> { "Un Authorized" });
+			if (string.IsNullOrEmpty(userId)) 
+				return Result.Failure(new List<string> { "Unauthorized" });
 
-			var variant = await _unitOfWork.Variants.FindAsync(x => x.Id == model.Id);
+			if (model.Quantity <= 0) 
+				return Result.Failure(new List<string> { "Quantity must be greater than zero" });
+
+			var variant = await _unitOfWork.Variants.FindAsync(
+				x => x.Id == model.Id,
+				q => q.Include(v => v.StockReservations)
+			);
+
 			if (variant == null)
 				return Result.Failure(new List<string> { "Product variant not found" });
 
-			if (variant.StockQuantity < model.Quantity)
+			var availableStock = GetAvailableStock(variant);
+
+			if (availableStock < model.Quantity)
 				return Result.Failure(new List<string> { "Requested quantity exceeds available stock" });
 
-			var cart = await _unitOfWork.Carts.FindAsync(x => x.AppUserId == userId);
-			
+			var cart = await _unitOfWork.Carts.FindAsync(
+				x => x.AppUserId == userId,
+				q => q.Include(c => c.CartItems)
+			);
+
 			if (cart != null)
 			{
-				var cartItem = await _unitOfWork.CartItems.FindAsync(x => x.CartId == cart.Id && x.ProductVariantId == model.Id);
+				var cartItem = cart.CartItems.FirstOrDefault(x => x.ProductVariantId == model.Id);
 				if (cartItem != null)
 				{
 					int newQuantity = cartItem.Quantity + model.Quantity;
-					if (newQuantity > variant.StockQuantity)
+					if (newQuantity > availableStock)
 						return Result.Failure(new List<string> { "Total quantity exceeds available stock" });
 
 					cartItem.Quantity = newQuantity;
-					cart.UpdatedOn=DateTime.UtcNow;
+					cart.UpdatedOn = DateTime.UtcNow;
 					await _unitOfWork.CartItems.UpdateAsync(cartItem);
 				}
 				else
 				{
 					cartItem = new CartItem
 					{
-						
 						CartId = cart.Id,
 						ProductVariantId = model.Id,
 						Quantity = model.Quantity
 					};
 					await _unitOfWork.CartItems.AddAsync(cartItem);
+					cart.UpdatedOn = DateTime.UtcNow;
+					await _unitOfWork.Carts.UpdateAsync(cart);
 				}
 			}
 			else
 			{
-				cart = new Cart { AppUserId = userId ,CreatedOn=DateTime.UtcNow };
+				cart = new Cart
+				{
+					AppUserId = userId,
+					CreatedOn = DateTime.UtcNow,
+					UpdatedOn = DateTime.UtcNow
+				};
 				await _unitOfWork.Carts.AddAsync(cart);
-				
+
 				var cartItem = new CartItem
 				{
-					Cart=cart,
+					Cart = cart,
 					ProductVariantId = model.Id,
 					Quantity = model.Quantity
 				};
@@ -86,17 +105,24 @@ namespace DripOut.Application.ApplicationServices
 			if (cartItemId <= 0)
 				return Result.Failure(new List<string> { "Invalid cart item id" });
 
-			var cartItem = await _unitOfWork.CartItems.FindAsync(x => x.Id == cartItemId);
+			// Get cart item with cart in one query
+			var cartItem = await _unitOfWork.CartItems.FindAsync(
+				x => x.Id == cartItemId,
+				q => q.Include(ci => ci.Cart)
+			);
+
 			if (cartItem == null)
 				return Result.Failure(new List<string> { "Cart item not found" });
 
 			// Verify the cart item belongs to the user
-			var cart = await _unitOfWork.Carts.FindAsync(x => x.Id == cartItem.CartId);
-			if (cart == null || cart.AppUserId != userId)
+			if (cartItem.Cart == null || cartItem.Cart.AppUserId != userId)
 				return Result.Failure(new List<string> { "Unauthorized to delete this cart item" });
+
 			await _unitOfWork.CartItems.DeleteAsync(cartItem);
-			cart.UpdatedOn = DateTime.Now;
-			await _unitOfWork.Carts.UpdateAsync(cart);
+
+			cartItem.Cart.UpdatedOn = DateTime.UtcNow; // Use UtcNow for consistency
+			await _unitOfWork.Carts.UpdateAsync(cartItem.Cart);
+
 			await _unitOfWork.SaveChangesAsync();
 			return Result.Success("Cart item deleted successfully");
 		}
@@ -106,31 +132,38 @@ namespace DripOut.Application.ApplicationServices
 			if (string.IsNullOrEmpty(userId))
 				return Result<CartReturnDto>.Failure(new List<string> { "User Unauthorized" });
 
-			var cartfound = await _unitOfWork.Carts.FindAsync(
-			x => x.AppUserId == userId,
-			q => q.Include(c => c.CartItems)
-			  .ThenInclude(ci => ci.ProductVariant)
-				  .ThenInclude(pv => pv.Product)
-					  .ThenInclude(p => p!.Images));
+			var cartFound = await _unitOfWork.Carts.FindAsync(
+				x => x.AppUserId == userId,
+				q => q.Include(c => c.CartItems)
+					.ThenInclude(ci => ci.ProductVariant)
+						.ThenInclude(pv => pv.Product)
+							.ThenInclude(p => p!.Images));
 
-
-
-			if (cartfound == null)
-				return Result<CartReturnDto>.Failure(new List<string> { "User doesn't have a cart yet" });
+			if (cartFound == null || !cartFound.CartItems.Any())
+				return Result<CartReturnDto>.Success(new CartReturnDto
+				{
+					Items = new List<CartItemDto>(),
+					TotalItems = 0,
+					CartSubtotal = 0,
+					TotalDiscount = 0,
+					CartTotal = 0
+				}, "Cart is empty");
 
 			var cartItems = new List<CartItemDto>();
 			decimal cartSubtotal = 0;
 			decimal totalDiscount = 0;
 
-			foreach (var item in cartfound.CartItems)
+			foreach (var item in cartFound.CartItems)
 			{
-				var product = item.ProductVariant.Product;
-				decimal itemSubtotal = product!.Price * item.Quantity;
-				decimal itemDiscount = itemSubtotal * (decimal)(product.Discount / 100);
+				var product = item.ProductVariant?.Product;
+				if (product == null) continue; // Skip invalid items
+
+				decimal itemSubtotal = product.Price * item.Quantity;
+				decimal itemDiscount = itemSubtotal * (decimal)(product.Discount / 100.0);
 
 				var cartItemDto = new CartItemDto
 				{
-					CartId = item.Id,
+					Id = item.Id,
 					VarientName = product.Title,
 					Quantity = item.Quantity,
 					VariantId = item.ProductVariantId,
@@ -139,8 +172,9 @@ namespace DripOut.Application.ApplicationServices
 					DiscountApplied = itemDiscount,
 					Total = itemSubtotal - itemDiscount,
 					ImageUrl = product.Images?
+						.Where(x => !string.IsNullOrEmpty(x.ImageUrl))
 						.Select(x => x.ImageUrl)
-						.FirstOrDefault(u => !string.IsNullOrEmpty(u)) ?? string.Empty
+						.FirstOrDefault() ?? string.Empty
 				};
 
 				cartItems.Add(cartItemDto);
@@ -168,24 +202,31 @@ namespace DripOut.Application.ApplicationServices
 			if (cartItemId <= 0)
 				return Result.Failure(new List<string> { "Invalid cart item id" });
 
-			var cartItem = await _unitOfWork.CartItems.FindAsync(x => x.Id == cartItemId);
+			if (quantity <= 0)
+				return Result.Failure(new List<string> { "Quantity must be greater than zero" });
+
+			var cartItem = await _unitOfWork.CartItems.FindAsync(
+				x => x.Id == cartItemId,
+				q => q.Include(ci => ci.Cart)
+					.Include(ci => ci.ProductVariant)
+						.ThenInclude(pv => pv.StockReservations)
+			);
+
 			if (cartItem == null)
 				return Result.Failure(new List<string> { "Cart item not found" });
 
-			var cart = await _unitOfWork.Carts.FindAsync(x => x.Id == cartItem.CartId);
-			if (cart == null || cart.AppUserId != userId)
+			if (cartItem.Cart == null || cartItem.Cart.AppUserId != userId)
 				return Result.Failure(new List<string> { "Unauthorized to update this cart item" });
 
-
-			var variant = await _unitOfWork.Variants.FindAsync(x => x.Id == cartItem.ProductVariantId);
-			if (variant == null)
+			if (cartItem.ProductVariant == null)
 				return Result.Failure(new List<string> { "Product variant not found" });
 
-			if (variant.StockQuantity < quantity)
+			var availableStock = GetAvailableStock(cartItem.ProductVariant);
+			if (availableStock < quantity)
 				return Result.Failure(new List<string> { "Requested quantity exceeds available stock" });
 
 			cartItem.Quantity = quantity;
-			cart.UpdatedOn = DateTime.UtcNow;
+			cartItem.Cart.UpdatedOn = DateTime.UtcNow;
 
 			await _unitOfWork.CartItems.UpdateAsync(cartItem);
 			await _unitOfWork.SaveChangesAsync();
@@ -197,18 +238,33 @@ namespace DripOut.Application.ApplicationServices
 		{
 			if (string.IsNullOrEmpty(userId))
 				return Result.Failure("User unauthorized");
-			var cart = await _unitOfWork.Carts.FindAsync(x => x.AppUserId == userId, x=>x.CartItems);
-			if (cart==null)
-				return Result.Failure("there is no cart to be cleared");
-			foreach (var item in cart.CartItems)
-			{
-				await _unitOfWork.CartItems.DeleteAsync(item);
 
-			}
+			var cart = await _unitOfWork.Carts.FindAsync(
+				x => x.AppUserId == userId,
+				x => x.Include(c => c.CartItems)
+			);
+
+			if (cart == null || !cart.CartItems.Any())
+				return Result.Success("Cart is already empty");
+
+			// Use bulk delete instead of individual deletes
+			await _unitOfWork.CartItems.DeleteRangeAsync(cart.CartItems);
+
 			cart.UpdatedOn = DateTime.UtcNow;
 			await _unitOfWork.Carts.UpdateAsync(cart);
 			await _unitOfWork.SaveChangesAsync();
-			return Result.Success("Cart is cleared successfully");
+
+			return Result.Success("Cart cleared successfully");
+		}
+
+		private static int GetAvailableStock(ProductVariant variant)
+		{
+			
+			var activeReservations = variant.StockReservations
+				?.Where(r => !r.IsExpired)
+				.Sum(r => r.Quantity) ?? 0;
+
+			return variant.StockQuantity - activeReservations;
 		}
 	}
 }

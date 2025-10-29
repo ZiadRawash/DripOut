@@ -84,7 +84,7 @@ namespace DripOut.API.Controllers
 
 			var result = await _authService.AccessRefreshToken(dto.refreshToken);
 			if (!result.IsSucceeded)
-				return BadRequest(new ApiResponse { Success = false, Errors = result.Errors });
+				return Unauthorized(new ApiResponse { Success = false, Errors = result.Errors });
 
 			return Ok(new ApiResponse<TokenDto>
 			{

@@ -6,7 +6,8 @@ namespace DripOut.Application.Interfaces.ReposInterface
 {
     public interface IBaseRepository<T> where T : class
     {
-        public Task<T?> AddAsync(T entity);
+		public Task<IEnumerable<T>> DeleteRangeAsync(IEnumerable<T> entities);
+		public Task<T?> AddAsync(T entity);
         public Task<IEnumerable<T>> AddRangeAsync(IEnumerable<T> entities);
 
         public Task<T?> UpdateAsync(T entity);

@@ -13,17 +13,16 @@ namespace DripOut.Domain.Models
 		public int Id { get; set; }
 		public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
+		public decimal SubTotal { get; set; }
 		public decimal TotalCost { get; set; }
 
 		public OrderStatus Status { get; set; }
 
-		public string ShippingName { get; set; } = string.Empty;
 		public string ShippingAddress { get; set; } = string.Empty;
 		public string ShippingPhone { get; set; } = string.Empty;
 		public string? PaymentIntentId { get; set; }
 
-		public decimal ShippingCost { get; set; }// snapshot
-		public string ShippingGovernorateNameSnapshot { get; set; } = string.Empty; // snapshot
+		public string GovernorateNameSnapshot { get; set; } = string.Empty; // snapshot
 		public decimal ShippingCostSnapShot { get; set; }                           // snapshot                       
 		public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 

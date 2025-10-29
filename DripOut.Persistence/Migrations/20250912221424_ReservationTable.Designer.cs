@@ -4,6 +4,7 @@ using DripOut.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DripOut.Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250912221424_ReservationTable")]
+    partial class ReservationTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -257,10 +260,6 @@ namespace DripOut.Persistence.Migrations
                     b.Property<int>("GovernorateId")
                         .HasColumnType("int");
 
-                    b.Property<string>("GovernorateNameSnapshot")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("OrderDate")
                         .HasColumnType("datetime2");
 
@@ -274,15 +273,16 @@ namespace DripOut.Persistence.Migrations
                     b.Property<decimal>("ShippingCostSnapShot")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<string>("ShippingGovernorateNameSnapshot")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ShippingPhone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
-
-                    b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("TotalCost")
                         .HasColumnType("decimal(18,2)");
@@ -521,7 +521,13 @@ namespace DripOut.Persistence.Migrations
                     b.Property<int>("OrderItemId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("OrderItemId1")
+                        .HasColumnType("int");
+
                     b.Property<int>("ProductVariantId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ProductVariantId1")
                         .HasColumnType("int");
 
                     b.Property<int>("Quantity")
@@ -535,7 +541,13 @@ namespace DripOut.Persistence.Migrations
                     b.HasIndex("OrderItemId")
                         .IsUnique();
 
+                    b.HasIndex("OrderItemId1")
+                        .IsUnique()
+                        .HasFilter("[OrderItemId1] IS NOT NULL");
+
                     b.HasIndex("ProductVariantId");
+
+                    b.HasIndex("ProductVariantId1");
 
                     b.ToTable("StockReservation");
                 });
@@ -864,16 +876,24 @@ namespace DripOut.Persistence.Migrations
             modelBuilder.Entity("DripOut.Domain.Models.StockReservation", b =>
                 {
                     b.HasOne("DripOut.Domain.Models.OrderItem", "OrderItem")
-                        .WithOne("StockReservation")
+                        .WithOne()
                         .HasForeignKey("DripOut.Domain.Models.StockReservation", "OrderItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DripOut.Domain.Models.OrderItem", null)
+                        .WithOne("StockReservation")
+                        .HasForeignKey("DripOut.Domain.Models.StockReservation", "OrderItemId1");
+
                     b.HasOne("DripOut.Domain.Models.ProductVariant", "ProductVariant")
-                        .WithMany("StockReservations")
+                        .WithMany()
                         .HasForeignKey("ProductVariantId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("DripOut.Domain.Models.ProductVariant", null)
+                        .WithMany("StockReservations")
+                        .HasForeignKey("ProductVariantId1");
 
                     b.Navigation("OrderItem");
 

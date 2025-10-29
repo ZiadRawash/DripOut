@@ -22,7 +22,7 @@
 			public decimal ShippingCost { get; set; }
 
 			[Column(TypeName = "decimal(18,2)")]
-			public decimal MinimumOrderForFreeShipping { get; set; }
+			public decimal Threshold { get; set; }
 
 			[Range(0, 100)]
 			[Column(TypeName = "decimal(18,2)")]

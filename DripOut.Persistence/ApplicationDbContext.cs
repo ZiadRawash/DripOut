@@ -54,7 +54,43 @@ namespace DripOut.Persistence
                 .WithMany(u => u.Favorites)
                 .HasForeignKey(f => f.ProductId);
 
-            List<IdentityRole> roles = new List<IdentityRole>
+
+
+
+
+			// OrderItem relationships
+			builder.Entity<OrderItem>()
+				.HasOne(oi => oi.Order)
+				.WithMany(o => o.OrderItems)
+				.HasForeignKey(oi => oi.OrderId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<OrderItem>()
+				.HasOne(oi => oi.ProductVariant)
+				.WithMany(pv => pv.OrderItems)
+				.HasForeignKey(oi => oi.ProductVariantId)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			builder.Entity<StockReservation>()
+				.HasOne(sr => sr.OrderItem)
+				.WithOne(oi => oi.StockReservation)  // Fixed: Added inverse navigation
+				.HasForeignKey<StockReservation>(sr => sr.OrderItemId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			builder.Entity<StockReservation>()
+				.HasOne(sr => sr.ProductVariant)
+				.WithMany(pv => pv.StockReservations)  // Fixed: Use the collection navigation
+				.HasForeignKey(sr => sr.ProductVariantId)
+				.OnDelete(DeleteBehavior.Cascade);
+
+
+
+
+
+
+
+
+			List<IdentityRole> roles = new List<IdentityRole>
 			{
 				new IdentityRole
 				{

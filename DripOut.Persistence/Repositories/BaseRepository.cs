@@ -14,7 +14,17 @@ namespace DripOut.Persistence.Repositories
 			this.dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 			this.dbSet = dbContext.Set<T>();
 		}
+		public async Task<IEnumerable<T>> DeleteRangeAsync(IEnumerable<T> entities)
+		{
+			if (entities == null) throw new ArgumentNullException(nameof(entities));
 
+			foreach (var entity in entities)
+			{
+				dbSet.Remove(entity);
+			}
+
+			return entities;
+		}
 		public async Task<T?> AddAsync(T entity)
 		{
 			if (entity == null) throw new ArgumentNullException(nameof(entity));

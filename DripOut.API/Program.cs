@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Reflection;
 using System.Security.Principal;
 var builder = WebApplication.CreateBuilder(args);
@@ -27,12 +28,17 @@ builder.Configuration
 	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
 	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
 
+// Configure Serilog 
+builder.Host.UseSerilog((context, configuration) =>
+	configuration.ReadFrom.Configuration(context.Configuration));
+
 // Add services to the container.
 builder.Services.AddTransient<IIdentityService, IdentityService>();
 builder.Services.AddTransient<IJWTService, JWTService>();
 builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IStripeService, StripeService>();
 
 //initialize FluentValidators
 builder.Services.AddValidatorsFromAssemblyContaining<PostShippingOrderDTOValidator>();
@@ -44,6 +50,7 @@ builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JWTSet
 builder.Services.Configure<CloudinarySettings>(builder.Configuration.GetSection("CloudinarySettings"));
 //Mapping MailSettings To class
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("StripeSettings"));
 //Mapping GoogleAuth To class
 builder.Services.Configure<Authentication_google>(builder.Configuration.GetSection("Authentication:Google"));
 
@@ -51,13 +58,13 @@ builder.Configuration
 	.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
 	.AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true);
 
-
 builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 builder.Services.AddScoped<IGovernorateService, GovernorateService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped(typeof(IBaseRepository<>) , typeof(BaseRepository<>) );
 
 
@@ -151,6 +158,21 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
+// CORS services
+var MyAllowedOrigins = "_myAllowedOrigins";
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy(name: MyAllowedOrigins,
+					  policy =>
+					  {
+						  policy.WithOrigins("http://localhost:3000") 
+								.AllowAnyHeader()
+								.AllowAnyMethod();
+					  });
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -161,10 +183,25 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+//imp
+app.UseRouting();
+//imp
+app.UseCors(MyAllowedOrigins);
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.Run();
+try
+{
+	Log.Information("Starting DripOut web application");
+	app.Run();
+}
+catch (Exception ex)
+{
+	Log.Fatal(ex, "DripOut application terminated unexpectedly");
+}
+finally
+{
+	Log.CloseAndFlush();
+}

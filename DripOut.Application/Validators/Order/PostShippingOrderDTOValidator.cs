@@ -24,16 +24,6 @@ namespace DripOut.Application.Validators.Order
 					.Matches(@"^[\+]?[0-9\-\(\)\s]+$")
 					.WithMessage("Phone number contains invalid characters. Use English numbers only.");
 
-
-				RuleFor(x => x.ShippingName)
-					.NotEmpty()
-					.WithMessage("Shipping name is required.")
-					.Length(2, 100)
-					.WithMessage("Shipping name must be between 2 and 100 characters.")
-					.Matches(@"^[\u0600-\u06FFa-zA-Z\s\.\-']+$")
-					.WithMessage("Name can only contain Arabic letters, English letters, spaces, periods, hyphens, and apostrophes.");
-
-
 				RuleFor(x => x.ShippingAddress)
 					.NotEmpty()
 					.WithMessage("Shipping address is required.")

@@ -43,7 +43,7 @@ namespace DripOut.Application.ApplicationServices
 					Id = g.Id,
 					Name = g.Name,
 					ShippingCost = g.ShippingCost,
-					MinimumOrderForFreeShipping = g.MinimumOrderForFreeShipping,
+					MinimumOrderForFreeShipping = g.Threshold,
 					DiscountPercentage = g.DiscountPercentage,
 					IsActive = g.IsActive,
 
@@ -82,7 +82,7 @@ namespace DripOut.Application.ApplicationServices
 					Id = governorate.Id,
 					Name = governorate.Name,
 					ShippingCost = governorate.ShippingCost,
-					MinimumOrderForFreeShipping = governorate.MinimumOrderForFreeShipping,
+					MinimumOrderForFreeShipping = governorate.Threshold,
 					DiscountPercentage = governorate.DiscountPercentage,
 					IsActive=governorate.IsActive,
 
@@ -113,7 +113,7 @@ namespace DripOut.Application.ApplicationServices
 				{
 					Name = createDto.Name.Trim(),
 					ShippingCost = createDto.ShippingCost,
-					MinimumOrderForFreeShipping = createDto.MinimumOrderForFreeShipping,
+					Threshold = createDto.MinimumOrderForFreeShipping,
 					DiscountPercentage = createDto.DiscountPercentage,
 					IsActive=true,
 					
@@ -127,7 +127,7 @@ namespace DripOut.Application.ApplicationServices
 					Id = governorate.Id,
 					Name = governorate.Name,
 					ShippingCost = governorate.ShippingCost,
-					MinimumOrderForFreeShipping = governorate.MinimumOrderForFreeShipping,
+					MinimumOrderForFreeShipping = governorate.Threshold,
 					DiscountPercentage = governorate.DiscountPercentage
 				};
 
@@ -167,7 +167,7 @@ namespace DripOut.Application.ApplicationServices
 
 				governorate.Name = updateDto.Name.Trim();
 				governorate.ShippingCost = updateDto.ShippingCost;
-				governorate.MinimumOrderForFreeShipping = updateDto.MinimumOrderForFreeShipping;
+				governorate.Threshold = updateDto.MinimumOrderForFreeShipping;
 				governorate.DiscountPercentage = updateDto.DiscountPercentage;
 
 				await _unitOfWork.Governorates.UpdateAsync(governorate);

@@ -21,6 +21,9 @@ namespace DripOut.Application.Interfaces.ReposInterface
         IBaseRepository<Cart> Carts{get; }
         IBaseRepository<CartItem> CartItems { get; }
         IBaseRepository<Governorate> Governorates { get; }
+        IBaseRepository <StockReservation> StockReservations { get; }
+        IBaseRepository <Order> Orders { get; }
+        IBaseRepository <OrderItem> OrderItems { get; }
         Task<int> SaveChangesAsync();
 
     }
